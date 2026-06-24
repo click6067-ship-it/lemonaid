@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Lemonaid",
+    "slug": "lemonaid",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF7B8"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

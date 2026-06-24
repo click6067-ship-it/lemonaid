@@ -1,0 +1,1139 @@
+<ㄹ!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lemonaid AAC iOS Concept</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #15171f;
+      --strong: #273044;
+      --muted: #768196;
+      --soft: #a0a9ba;
+      --line: rgba(255, 255, 255, .82);
+      --glass: rgba(255, 255, 255, .36);
+      --matte: #fbfbf6;
+      --lemon: #ffe66f;
+      --lemon-2: #ffd749;
+      --lemon-3: #f7c821;
+      --mint: #58d6b0;
+      --aqua: #63d3e8;
+      --coral: #ff8e7a;
+      --violet: #9d88ff;
+      --blue: #6ba5ff;
+      --shadow-light: -13px -13px 28px rgba(255, 255, 255, .94);
+      --shadow-dark: 16px 20px 42px rgba(96, 105, 124, .16);
+      --shadow-soft: 0 20px 52px rgba(68, 75, 92, .13);
+      --shadow-glow: 0 18px 42px rgba(247, 200, 33, .26);
+      --liquid-edge: inset 1px 1px 0 rgba(255, 255, 255, .96), inset -1px -1px 0 rgba(255, 255, 255, .34);
+      --liquid-shadow: 0 22px 58px rgba(62, 72, 92, .15), 0 2px 8px rgba(255, 255, 255, .34) inset;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(255, 230, 111, .42), transparent 30%),
+        radial-gradient(circle at 92% 15%, rgba(99, 211, 232, .32), transparent 31%),
+        radial-gradient(circle at 54% 98%, rgba(157, 136, 255, .24), transparent 35%),
+        linear-gradient(135deg, #fbfcff 0%, #fffdf2 44%, #f3f8ff 100%);
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 44px;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; border: 0; }
+
+    .sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .ic {
+      width: 24px;
+      height: 24px;
+      display: block;
+      color: currentColor;
+    }
+
+    .board {
+      width: min(1520px, 100%);
+      margin: 0 auto;
+    }
+
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(270px, 1fr));
+      gap: 28px;
+      align-items: start;
+    }
+
+    .phone {
+      position: relative;
+      height: 820px;
+      min-height: 820px;
+      overflow: hidden;
+      border-radius: 44px;
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 15% 7%, rgba(255, 241, 148, .64), transparent 31%),
+        radial-gradient(circle at 94% 36%, rgba(99, 211, 232, .28), transparent 31%),
+        radial-gradient(circle at 78% 93%, rgba(255, 142, 122, .23), transparent 35%),
+        radial-gradient(circle at 8% 78%, rgba(185, 167, 255, .22), transparent 32%),
+        linear-gradient(158deg, #fffefa 0%, #f8fbff 50%, #fff8d6 100%);
+      box-shadow:
+        0 34px 76px rgba(53, 63, 83, .2),
+        inset 0 0 0 1px rgba(255, 255, 255, .9),
+        inset 0 18px 45px rgba(255, 255, 255, .42);
+    }
+
+    .phone::before,
+    .phone::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      z-index: -1;
+      filter: blur(.2px);
+    }
+
+    .phone::before {
+      width: 290px;
+      height: 290px;
+      right: -118px;
+      bottom: 28px;
+      background: radial-gradient(circle, rgba(255, 215, 73, .64), rgba(255, 245, 177, .32) 46%, rgba(255, 215, 73, 0) 70%);
+    }
+
+    .phone::after {
+      width: 240px;
+      height: 240px;
+      left: -105px;
+      top: 128px;
+      background: radial-gradient(circle, rgba(157, 136, 255, .34), rgba(126, 221, 229, .18) 48%, rgba(157, 136, 255, 0) 72%);
+    }
+
+    .statusbar {
+      height: 58px;
+      padding: 19px 27px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .notch {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 122px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #050507;
+      box-shadow: inset 0 -1px 2px rgba(255, 255, 255, .12);
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal {
+      width: 17px;
+      height: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      align-items: end;
+    }
+
+    .signal i {
+      display: block;
+      width: 3px;
+      border-radius: 3px;
+      background: #111;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 6px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .wifi {
+      width: 16px;
+      height: 12px;
+      position: relative;
+    }
+
+    .wifi::before,
+    .wifi::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 2px solid #111;
+      border-bottom: 0;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      border-radius: 18px 18px 0 0;
+    }
+
+    .wifi::before {
+      width: 15px;
+      height: 9px;
+      top: 1px;
+    }
+
+    .wifi::after {
+      width: 7px;
+      height: 4px;
+      top: 6px;
+    }
+
+    .battery {
+      width: 25px;
+      height: 12px;
+      position: relative;
+      border: 2px solid #111;
+      border-radius: 4px;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      inset: 2px 7px 2px 2px;
+      border-radius: 2px;
+      background: #111;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      right: -5px;
+      width: 3px;
+      height: 5px;
+      border-radius: 0 2px 2px 0;
+      background: #111;
+    }
+
+    .screen-content {
+      position: relative;
+      height: calc(820px - 58px);
+      overflow: hidden;
+      padding: 18px 22px 98px;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .icon-pill,
+    .avatar,
+    .nav-item,
+    .soft-pill,
+    .phrase-card,
+    .setting-row,
+    .category-chip {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .66), rgba(255, 255, 255, .28)),
+        rgba(255, 255, 255, .36);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: var(--shadow-light), var(--shadow-dark), var(--liquid-edge);
+      backdrop-filter: blur(24px) saturate(1.32);
+      -webkit-backdrop-filter: blur(24px) saturate(1.32);
+    }
+
+    .icon-pill::after,
+    .avatar::after,
+    .soft-pill::after,
+    .phrase-card::after,
+    .setting-row::after,
+    .category-chip::after,
+    .favorite-row::after,
+    .profile-card::after,
+    .favorite-stat::after,
+    .recent-item::after,
+    .result-card::after,
+    .nav::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: inherit;
+      background: linear-gradient(150deg, rgba(255, 255, 255, .62) 0%, rgba(255, 255, 255, .18) 40%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+    }
+
+    .icon-pill {
+      width: 48px;
+      height: 48px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+    }
+
+    .icon-pill > *,
+    .soft-pill > *,
+    .category-chip > *,
+    .setting-row > *,
+    .favorite-row > *,
+    .profile-card > *,
+    .favorite-stat > *,
+    .recent-item > *,
+    .result-card > *,
+    .nav > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .home-hero {
+      position: relative;
+      min-height: 318px;
+      padding: 22px;
+      border-radius: 36px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 17%, rgba(255, 250, 204, .98), rgba(255, 230, 111, .9) 35%, rgba(255, 215, 73, .54) 58%, rgba(255, 255, 255, .34) 100%),
+        radial-gradient(circle at 12% 88%, rgba(126, 221, 229, .54), transparent 43%),
+        linear-gradient(155deg, #fffdef, #ffe66f 48%, #fff6c4);
+      box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, .94),
+        inset -18px -20px 46px rgba(214, 167, 15, .12),
+        0 30px 68px rgba(218, 177, 32, .24);
+    }
+
+    .home-hero::before,
+    .home-hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .home-hero::before {
+      width: 230px;
+      height: 230px;
+      left: -82px;
+      bottom: -70px;
+      background: radial-gradient(circle, rgba(99, 211, 232, .56), rgba(126, 221, 229, .24) 46%, transparent 72%);
+    }
+
+    .home-hero::after {
+      width: 170px;
+      height: 170px;
+      right: -52px;
+      top: -42px;
+      background: radial-gradient(circle, rgba(255, 255, 255, .78), rgba(255, 255, 255, .18) 44%, transparent 69%);
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-copy h2 {
+      margin: 0;
+      max-width: 260px;
+      color: var(--ink);
+      font-size: 29px;
+      line-height: 1.14;
+      letter-spacing: 0;
+    }
+
+    .voice-stage {
+      position: relative;
+      z-index: 1;
+      height: 166px;
+      margin-top: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .voice-ring,
+    .voice-ring::before,
+    .voice-ring::after {
+      content: "";
+      position: absolute;
+      width: 166px;
+      height: 166px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, .78);
+      box-shadow: 0 0 46px rgba(255, 255, 255, .5), inset 0 0 22px rgba(255, 255, 255, .16);
+    }
+
+    .voice-ring::before {
+      width: 124px;
+      height: 124px;
+      inset: 19px;
+      border-color: rgba(255, 255, 255, .66);
+    }
+
+    .voice-ring::after {
+      width: 88px;
+      height: 88px;
+      inset: 37px;
+      border-color: rgba(255, 255, 255, .72);
+    }
+
+    .mic-button {
+      position: relative;
+      z-index: 2;
+      width: 112px;
+      height: 112px;
+      display: grid;
+      place-items: center;
+      border-radius: 44px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 32% 23%, rgba(255, 255, 255, .84), transparent 26%),
+        linear-gradient(160deg, #fff8bd 0%, var(--lemon) 42%, var(--lemon-2) 100%);
+      box-shadow:
+        -10px -10px 26px rgba(255, 255, 255, .8),
+        13px 16px 32px rgba(164, 124, 0, .24),
+        inset 1px 1px 0 rgba(255, 255, 255, .88),
+        inset -7px -8px 15px rgba(210, 158, 0, .16);
+    }
+
+    .mic-button::before {
+      content: "";
+      position: absolute;
+      inset: 9px 13px auto;
+      height: 34px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 255, 255, .08));
+      pointer-events: none;
+    }
+
+    .mic-button .ic {
+      width: 50px;
+      height: 50px;
+    }
+
+    .result-card {
+      position: relative;
+      z-index: 4;
+      margin-top: -28px;
+      padding: 17px;
+      border-radius: 30px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .25)),
+        rgba(255, 255, 255, .3);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow: var(--liquid-shadow), var(--liquid-edge);
+      backdrop-filter: blur(32px) saturate(1.42);
+      -webkit-backdrop-filter: blur(32px) saturate(1.42);
+      transform: rotate(-2.2deg);
+    }
+
+    .label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .result-card p:last-of-type {
+      margin: 0;
+      color: var(--ink);
+      font-size: 18px;
+      line-height: 1.28;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .play-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .play-primary {
+      min-height: 48px;
+      flex: 1;
+      border-radius: 19px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .62), transparent 26%),
+        linear-gradient(160deg, #fff7b9, var(--lemon) 55%, var(--lemon-2));
+      box-shadow: var(--shadow-glow), inset 1px 1px 0 rgba(255, 255, 255, .94), inset -5px -6px 12px rgba(198, 145, 0, .12);
+    }
+
+    .soft-pill {
+      width: 52px;
+      height: 50px;
+      border-radius: 19px;
+      display: grid;
+      place-items: center;
+      color: var(--strong);
+    }
+
+    .recent-strip {
+      margin-top: 15px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .recent-item {
+      min-height: 64px;
+      padding: 12px 16px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .66), rgba(255, 255, 255, .3)),
+        rgba(255, 255, 255, .36);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: 0 14px 32px rgba(71, 80, 99, .1), var(--liquid-edge);
+      backdrop-filter: blur(22px) saturate(1.25);
+      -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    }
+
+    .recent-item strong {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .recent-item span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .search {
+      height: 54px;
+      padding: 0 16px;
+      border-radius: 21px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--soft);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .66), rgba(255, 255, 255, .28)),
+        rgba(255, 255, 255, .34);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: inset 4px 5px 14px rgba(101, 110, 128, .08), inset -5px -5px 14px rgba(255, 255, 255, .9), 0 12px 28px rgba(74, 83, 103, .08);
+      backdrop-filter: blur(24px) saturate(1.25);
+      -webkit-backdrop-filter: blur(24px) saturate(1.25);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .categories {
+      display: flex;
+      gap: 10px;
+      margin: 18px -22px 16px;
+      padding: 0 22px 8px;
+      overflow: hidden;
+    }
+
+    .category-chip {
+      min-width: 69px;
+      min-height: 66px;
+      padding: 8px 10px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      color: var(--strong);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .category-chip.active {
+      background:
+        radial-gradient(circle at 32% 20%, rgba(255, 255, 255, .72), transparent 30%),
+        linear-gradient(160deg, #fff9c8, var(--lemon));
+      box-shadow: 0 16px 32px rgba(247, 200, 33, .22), var(--liquid-edge);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px;
+    }
+
+    .phrase-card {
+      position: relative;
+      min-height: 124px;
+      padding: 14px 13px;
+      border-radius: 28px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .phrase-card:nth-child(2n) { transform: rotate(1.8deg); }
+    .phrase-card:nth-child(3n) { transform: rotate(-1.5deg); }
+
+    .phrase-card::before {
+      content: "";
+      position: absolute;
+      width: 108px;
+      height: 108px;
+      right: -39px;
+      top: -34px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--card-glow, rgba(255, 230, 111, .54)), transparent 70%);
+      filter: blur(.3px);
+    }
+
+    .phrase-icon {
+      width: 47px;
+      height: 47px;
+      position: relative;
+      z-index: 1;
+      border-radius: 21px;
+      display: grid;
+      place-items: center;
+      color: var(--icon, var(--ink));
+      background:
+        radial-gradient(circle at 32% 22%, rgba(255, 255, 255, .72), transparent 32%),
+        rgba(255, 255, 255, .42);
+      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .92), 0 10px 24px rgba(69, 78, 98, .1);
+    }
+
+    .phrase-card strong {
+      position: relative;
+      z-index: 1;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.13;
+      letter-spacing: 0;
+    }
+
+    .phrase-card small {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .favorites-hero {
+      position: relative;
+      min-height: 174px;
+      padding: 20px;
+      border-radius: 36px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 80% 12%, rgba(255, 255, 255, .86), transparent 33%),
+        radial-gradient(circle at 10% 92%, rgba(126, 221, 229, .58), transparent 42%),
+        linear-gradient(145deg, #fff4aa 0%, #ffe66f 48%, #d9f7ed 100%);
+      box-shadow: 0 25px 58px rgba(172, 132, 10, .18), inset 1px 1px 0 rgba(255, 255, 255, .94);
+    }
+
+    .favorites-hero::after {
+      content: "";
+      position: absolute;
+      width: 210px;
+      height: 210px;
+      right: -88px;
+      bottom: -105px;
+      border-radius: 56px;
+      transform: rotate(28deg);
+      background: rgba(255, 255, 255, .3);
+      border: 1px solid rgba(255, 255, 255, .58);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    }
+
+    .favorite-stat {
+      position: absolute;
+      right: 22px;
+      bottom: 20px;
+      min-width: 104px;
+      padding: 15px;
+      overflow: hidden;
+      border-radius: 27px;
+      color: var(--ink);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .28)),
+        rgba(255, 255, 255, .34);
+      border: 1px solid rgba(255, 255, 255, .82);
+      box-shadow: var(--liquid-shadow), var(--liquid-edge);
+      backdrop-filter: blur(28px) saturate(1.28);
+      -webkit-backdrop-filter: blur(28px) saturate(1.28);
+    }
+
+    .favorite-stat strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .favorite-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .favorite-row {
+      min-height: 70px;
+      padding: 11px 13px 11px 17px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      display: grid;
+      grid-template-columns: 1fr 52px;
+      align-items: center;
+      gap: 12px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .64), rgba(255, 255, 255, .28)),
+        rgba(255, 255, 255, .36);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: var(--shadow-soft), var(--liquid-edge);
+      backdrop-filter: blur(24px) saturate(1.28);
+      -webkit-backdrop-filter: blur(24px) saturate(1.28);
+    }
+
+    .favorite-row:nth-child(2) { transform: rotate(-1.2deg); }
+    .favorite-row:nth-child(3) { transform: rotate(1.1deg); }
+
+    .favorite-row strong {
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.24;
+    }
+
+    .favorite-row span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .play-mini {
+      width: 49px;
+      height: 49px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .68), transparent 30%),
+        linear-gradient(160deg, #fff8bd, var(--lemon));
+      box-shadow: 0 12px 24px rgba(247, 200, 33, .22), var(--liquid-edge);
+    }
+
+    .profile-card {
+      min-height: 166px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 38px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background:
+        radial-gradient(circle at 6% 94%, rgba(126, 221, 229, .34), transparent 40%),
+        linear-gradient(145deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, .26)),
+        rgba(255, 255, 255, .34);
+      border: 1px solid rgba(255, 255, 255, .88);
+      box-shadow: var(--liquid-shadow), var(--liquid-edge);
+      backdrop-filter: blur(30px) saturate(1.32);
+      -webkit-backdrop-filter: blur(30px) saturate(1.32);
+      transform: rotate(-1deg);
+    }
+
+    .avatar {
+      width: 88px;
+      height: 88px;
+      flex: 0 0 auto;
+      border-radius: 34px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 35%, #fff 0 22%, transparent 23%),
+        radial-gradient(circle at 30% 18%, rgba(255,255,255,.72), transparent 32%),
+        linear-gradient(160deg, #fff8bd, #d9f7ed);
+      font-size: 38px;
+      font-weight: 800;
+    }
+
+    .profile-card h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 24px;
+    }
+
+    .profile-card p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .setting-row {
+      min-height: 66px;
+      padding: 10px 15px;
+      border-radius: 27px;
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .setting-icon {
+      width: 48px;
+      height: 48px;
+      position: relative;
+      z-index: 1;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 30% 22%, rgba(255, 255, 255, .74), transparent 32%),
+        linear-gradient(150deg, rgba(255, 255, 255, .66), rgba(255, 230, 111, .46));
+      box-shadow: var(--liquid-edge), 0 9px 18px rgba(69, 78, 98, .08);
+    }
+
+    .setting-row strong {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .setting-row span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .toggle {
+      position: relative;
+      z-index: 1;
+      width: 56px;
+      height: 34px;
+      padding: 4px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .7), transparent 32%),
+        linear-gradient(160deg, #fff7b6, var(--lemon));
+      box-shadow: var(--liquid-edge), 0 10px 20px rgba(247, 200, 33, .2);
+    }
+
+    .toggle i {
+      display: block;
+      width: 26px;
+      height: 26px;
+      margin-left: auto;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 3px 9px rgba(63, 70, 88, .2);
+    }
+
+    .nav {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      height: 74px;
+      padding: 8px;
+      overflow: hidden;
+      border-radius: 31px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .64), rgba(255, 255, 255, .26)),
+        rgba(255, 255, 255, .34);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow:
+        var(--liquid-edge),
+        0 20px 46px rgba(60, 69, 88, .18);
+      backdrop-filter: blur(34px) saturate(1.34);
+      -webkit-backdrop-filter: blur(34px) saturate(1.34);
+    }
+
+    .nav-item {
+      height: 58px;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: #7b8496;
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .nav-item span {
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .nav-item.active {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 31% 18%, rgba(255, 255, 255, .78), transparent 34%),
+        linear-gradient(160deg, rgba(255, 252, 224, .96), rgba(255, 230, 111, .9));
+      border-color: rgba(255, 255, 255, .92);
+      box-shadow:
+        -6px -6px 16px rgba(255, 255, 255, .9),
+        8px 10px 20px rgba(180, 139, 6, .16),
+        var(--liquid-edge);
+    }
+
+    @media (max-width: 1240px) {
+      .phones { grid-template-columns: repeat(2, minmax(300px, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 18px; }
+      .phones { grid-template-columns: 1fr; }
+      .phone { min-height: 810px; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="ic-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-cards" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></g></symbol>
+    <symbol id="ic-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.7 6.3.8-4.6 4.4 1.2 6.2-5.6-3-5.6 3 1.2-6.2L3 9.5l6.3-.8L12 3z" fill="currentColor"/></symbol>
+    <symbol id="ic-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19 14.5a7.8 7.8 0 0 0 .1-1.2 7.8 7.8 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7.4 7.4 0 0 0-2-1.1L14.2 4h-4.4l-.4 3a7.4 7.4 0 0 0-2 1.1l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0-.1 1.2 7.8 7.8 0 0 0 .1 1.2l-2 1.5 2 3.5 2.4-1a7.4 7.4 0 0 0 2 1.1l.4 3h4.4l.4-3a7.4 7.4 0 0 0 2-1.1l2.4 1 2-3.5-2-1.5z"/></g></symbol>
+    <symbol id="ic-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8.5 21h7"/></g></symbol>
+    <symbol id="ic-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/></symbol>
+    <symbol id="ic-wave" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14v-4"/><path d="M8 17V7"/><path d="M12 20V4"/><path d="M16 17V7"/><path d="M20 14v-4"/></g></symbol>
+    <symbol id="ic-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-5L20 10"/></g></symbol>
+    <symbol id="ic-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></g></symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></symbol>
+    <symbol id="ic-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.3 6 11a6 6 0 0 1-12 0c0-4.7 6-11 6-11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-help" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V7.5a1.7 1.7 0 0 1 3.4 0V12"/><path d="M11.4 12V5.8a1.7 1.7 0 0 1 3.4 0V12"/><path d="M14.8 12V7.2a1.7 1.7 0 0 1 3.4 0V15c0 4-2.6 6-6.1 6H10a5 5 0 0 1-4.2-2.3L3.4 15a1.8 1.8 0 0 1 2.7-2.3L8 15"/></g></symbol>
+    <symbol id="ic-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-food" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16a7 7 0 0 1-14 0z"/><path d="M7 19h10"/><path d="M8 8c1.4-1.2 2.8-1.2 4 0 1.2 1.1 2.6 1.1 4 0"/></g></symbol>
+    <symbol id="ic-pain" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-25 12 12)"/><path d="m10 10 4 4"/><path d="m14 10-4 4"/></g></symbol>
+    <symbol id="ic-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></g></symbol>
+    <symbol id="ic-speed" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a8 8 0 1 1 14 0"/><path d="m12 14 4-4"/><path d="M12 14h.01"/></g></symbol>
+    <symbol id="ic-text" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V5h10v2"/><path d="M9 5v14"/><path d="M6 19h6"/><path d="M15 12h5"/><path d="M17.5 9v10"/></g></symbol>
+  </svg>
+
+  <main class="board" aria-label="Lemonaid AAC design board">
+    <section class="phones">
+      <article class="phone" aria-label="Home screen">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="status-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></span></div>
+        <div class="screen-content">
+          <div class="top-row">
+            <div>
+              <h1>Good morning, Alex 🌿</h1>
+              <p class="subtitle">Small words, clear voice.</p>
+            </div>
+            <button class="icon-pill" aria-label="Voice settings"><svg class="ic"><use href="#ic-wave"></use></svg></button>
+          </div>
+
+          <section class="home-hero">
+            <div class="hero-copy">
+              <p class="label">Speak Assist</p>
+              <h2>Press and speak naturally.</h2>
+            </div>
+            <div class="voice-stage">
+              <div class="voice-ring"></div>
+              <button class="mic-button" aria-label="Start listening"><svg class="ic"><use href="#ic-mic"></use></svg></button>
+            </div>
+          </section>
+
+          <section class="result-card">
+            <p class="label">Recognized Text</p>
+            <p>I need water. Please speak slowly.</p>
+            <div class="play-row">
+              <button class="play-primary"><svg class="ic"><use href="#ic-play"></use></svg> Play clear voice</button>
+              <button class="soft-pill" aria-label="Try again"><svg class="ic"><use href="#ic-refresh"></use></svg></button>
+            </div>
+          </section>
+
+          <section class="recent-strip">
+            <div class="recent-item"><div><strong>I am okay.</strong><span>Just now</span></div><svg class="ic"><use href="#ic-play"></use></svg></div>
+            <div class="recent-item"><div><strong>Please call my caregiver.</strong><span>8 min ago</span></div><svg class="ic"><use href="#ic-play"></use></svg></div>
+          </section>
+
+          <nav class="nav">
+            <button class="nav-item active"><svg class="ic"><use href="#ic-home"></use></svg><span>Home</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-cards"></use></svg><span>Cards</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-star"></use></svg><span>Saved</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-settings"></use></svg><span>Settings</span></button>
+          </nav>
+        </div>
+      </article>
+
+      <article class="phone" aria-label="Cards screen">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="status-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></span></div>
+        <div class="screen-content">
+          <div class="top-row">
+            <div>
+              <h1>Cards</h1>
+              <p class="subtitle">Tap a phrase to speak.</p>
+            </div>
+            <button class="icon-pill" aria-label="Add card"><svg class="ic"><use href="#ic-plus"></use></svg></button>
+          </div>
+
+          <div class="search"><svg class="ic"><use href="#ic-search"></use></svg><span>Search phrases</span></div>
+          <div class="categories">
+            <button class="category-chip active">Needs</button>
+            <button class="category-chip">Pain</button>
+            <button class="category-chip">Food</button>
+            <button class="category-chip">People</button>
+          </div>
+
+          <section class="card-grid">
+            <button class="phrase-card" style="--card-glow: rgba(255,230,111,.72); --icon:#d2a800"><span class="phrase-icon"><svg class="ic"><use href="#ic-help"></use></svg></span><strong>I need help</strong><small>Need</small></button>
+            <button class="phrase-card" style="--card-glow: rgba(99,211,232,.45); --icon:#149bb0"><span class="phrase-icon"><svg class="ic"><use href="#ic-drop"></use></svg></span><strong>I need water</strong><small>Drink</small></button>
+            <button class="phrase-card" style="--card-glow: rgba(255,142,122,.4); --icon:#e2644e"><span class="phrase-icon"><svg class="ic"><use href="#ic-pain"></use></svg></span><strong>I am in pain</strong><small>Health</small></button>
+            <button class="phrase-card" style="--card-glow: rgba(88,214,176,.42); --icon:#19a67a"><span class="phrase-icon"><svg class="ic"><use href="#ic-food"></use></svg></span><strong>I am hungry</strong><small>Food</small></button>
+            <button class="phrase-card" style="--card-glow: rgba(157,136,255,.38); --icon:#735ee7"><span class="phrase-icon"><svg class="ic"><use href="#ic-heart"></use></svg></span><strong>I feel anxious</strong><small>Feeling</small></button>
+            <button class="phrase-card" style="--card-glow: rgba(107,165,255,.38); --icon:#437bdc"><span class="phrase-icon"><svg class="ic"><use href="#ic-user"></use></svg></span><strong>Call my caregiver</strong><small>People</small></button>
+          </section>
+
+          <nav class="nav">
+            <button class="nav-item"><svg class="ic"><use href="#ic-home"></use></svg><span>Home</span></button>
+            <button class="nav-item active"><svg class="ic"><use href="#ic-cards"></use></svg><span>Cards</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-star"></use></svg><span>Saved</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-settings"></use></svg><span>Settings</span></button>
+          </nav>
+        </div>
+      </article>
+
+      <article class="phone" aria-label="Saved screen">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="status-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></span></div>
+        <div class="screen-content">
+          <div class="top-row">
+            <div>
+              <h1>Saved</h1>
+              <p class="subtitle">Your fastest phrases.</p>
+            </div>
+            <button class="icon-pill" aria-label="Add favorite"><svg class="ic"><use href="#ic-plus"></use></svg></button>
+          </div>
+
+          <section class="favorites-hero">
+            <p class="label">This Week</p>
+            <h1>42 phrases spoken</h1>
+            <p class="subtitle">Most used: “Please wait.”</p>
+            <div class="favorite-stat"><strong>12</strong><span>favorites</span></div>
+          </section>
+
+          <section class="favorite-list">
+            <div class="favorite-row"><div><strong>Please wait a moment.</strong><span>Everyday</span></div><button class="play-mini"><svg class="ic"><use href="#ic-play"></use></svg></button></div>
+            <div class="favorite-row"><div><strong>I need to rest.</strong><span>Comfort</span></div><button class="play-mini"><svg class="ic"><use href="#ic-play"></use></svg></button></div>
+            <div class="favorite-row"><div><strong>Where is the bathroom?</strong><span>Place</span></div><button class="play-mini"><svg class="ic"><use href="#ic-play"></use></svg></button></div>
+            <div class="favorite-row"><div><strong>Please call my family.</strong><span>Emergency</span></div><button class="play-mini"><svg class="ic"><use href="#ic-play"></use></svg></button></div>
+          </section>
+
+          <nav class="nav">
+            <button class="nav-item"><svg class="ic"><use href="#ic-home"></use></svg><span>Home</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-cards"></use></svg><span>Cards</span></button>
+            <button class="nav-item active"><svg class="ic"><use href="#ic-star"></use></svg><span>Saved</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-settings"></use></svg><span>Settings</span></button>
+          </nav>
+        </div>
+      </article>
+
+      <article class="phone" aria-label="Settings screen">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="status-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></span></div>
+        <div class="screen-content">
+          <div class="top-row">
+            <div>
+              <h1>Settings</h1>
+              <p class="subtitle">Voice and access.</p>
+            </div>
+            <button class="icon-pill" aria-label="Settings"><svg class="ic"><use href="#ic-settings"></use></svg></button>
+          </div>
+
+          <section class="profile-card">
+            <div class="avatar">A</div>
+            <div>
+              <h2>Alex</h2>
+              <p>Premium clear voice<br>English · Calm tone</p>
+            </div>
+          </section>
+
+          <section class="settings-list">
+            <div class="setting-row"><span class="setting-icon"><svg class="ic"><use href="#ic-wave"></use></svg></span><div><strong>Voice Style</strong><span>Natural, warm</span></div><span>›</span></div>
+            <div class="setting-row"><span class="setting-icon"><svg class="ic"><use href="#ic-speed"></use></svg></span><div><strong>Speech Speed</strong><span>Medium slow</span></div><span>›</span></div>
+            <div class="setting-row"><span class="setting-icon"><svg class="ic"><use href="#ic-text"></use></svg></span><div><strong>Large Cards</strong><span>Optimized touch size</span></div><span class="toggle"><i></i></span></div>
+            <div class="setting-row"><span class="setting-icon"><svg class="ic"><use href="#ic-cards"></use></svg></span><div><strong>Card Library</strong><span>Needs, pain, food, people</span></div><span>›</span></div>
+          </section>
+
+          <nav class="nav">
+            <button class="nav-item"><svg class="ic"><use href="#ic-home"></use></svg><span>Home</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-cards"></use></svg><span>Cards</span></button>
+            <button class="nav-item"><svg class="ic"><use href="#ic-star"></use></svg><span>Saved</span></button>
+            <button class="nav-item active"><svg class="ic"><use href="#ic-settings"></use></svg><span>Settings</span></button>
+          </nav>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
