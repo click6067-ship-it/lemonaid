@@ -63,8 +63,8 @@ export const shadow = {
 };
 
 export const type = {
-  h1: { fontSize: 26, lineHeight: 31, fontWeight: "800" as const, color: colors.ink, letterSpacing: -0.2 },
-  h2: { fontSize: 24, lineHeight: 29, fontWeight: "800" as const, color: colors.ink, letterSpacing: -0.2 },
-  body: { fontSize: 13, lineHeight: 19, fontWeight: "600" as const, color: colors.muted },
-  label: { fontSize: 11, lineHeight: 14, fontWeight: "800" as const, letterSpacing: 0.55, color: colors.muted }
+  h1: { fontSize: 28, lineHeight: 34, fontWeight: "800" as const, color: colors.ink, letterSpacing: 0 },
+  h2: { fontSize: 24, lineHeight: 30, fontWeight: "800" as const, color: colors.ink, letterSpacing: 0 },
+  body: { fontSize: 14, lineHeight: 20, fontWeight: "600" as const, color: colors.muted },
+  label: { fontSize: 12, lineHeight: 15, fontWeight: "800" as const, letterSpacing: 0, color: colors.muted }
 };

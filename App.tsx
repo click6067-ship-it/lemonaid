@@ -32,7 +32,6 @@ import {
 
 import { BottomNav } from "./src/components/BottomNav";
 import { ContentSurface, Glass, LemonButton } from "./src/components/GlassSurface";
-import { PhoneStatusBar } from "./src/components/PhoneStatusBar";
 import { WebGlassFX } from "./src/components/WebGlassFX";
 import { categories, favorites, phraseCards, settings as settingRows } from "./src/data";
 import { fontOptions, useOptionalFonts, type FontSet, type FontVariant } from "./src/fontPresets";
@@ -68,7 +67,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab());
   const fontsLoaded = useOptionalFonts();
   const fonts = fontOptions[getInitialFont()];
-  const { width, height } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const compact = height < 760;
 
   let content: ReactNode = <HomeScreen compact={compact} fonts={fonts} />;
@@ -82,7 +81,7 @@ export default function App() {
       <WebGlassFX />
       <View
         {...webData({ appbg: true })}
-        style={[styles.appFrame, isWeb && { width: Math.min(width, 412), minHeight: Math.min(height, 920) }]}
+        style={[styles.appFrame, isWeb && { minHeight: height }]}
       >
         {!isWeb && (
           <>
@@ -92,7 +91,6 @@ export default function App() {
           </>
         )}
 
-        <PhoneStatusBar />
         <View style={styles.content}>{fontsLoaded ? content : null}</View>
         {/* scroll-edge: soft fade just above the floating nav (content passes under it) */}
         <LinearGradient
@@ -141,6 +139,8 @@ function Toolbar({ title, sub, icon, fonts, label }: { title: string; sub: strin
 
 function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [recognizedIndex, setRecognizedIndex] = useState(0);
+  const { width } = useWindowDimensions();
+  const roomy = width >= 720;
   const recognized = recognitionSamples[recognizedIndex];
   const cycle = () => setRecognizedIndex((i) => (i + 1) % recognitionSamples.length);
 
@@ -149,18 +149,20 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       <Toolbar title="Good morning" sub="Small words, clear voice." label="Voice settings" fonts={fonts}
         icon={<Waves size={21} color={colors.strong} strokeWidth={2.2} />} />
 
-      <View style={[styles.hero, compact && { minHeight: 268 }]}>
+      <View style={[styles.hero, roomy && styles.heroRoomy, compact && !roomy && { minHeight: 278 }]}>
         <LinearGradient
-          colors={[colors.lemonHi, colors.lemon, colors.lemon2, "rgba(255,233,142,0.7)"]}
+          colors={["#FFF9CF", colors.lemonHi, colors.lemon, colors.lemon2]}
           locations={[0, 0.28, 0.56, 1]}
-          start={{ x: 0.5, y: 0.1 }}
-          end={{ x: 0.5, y: 1 }}
+          start={{ x: 0.18, y: 0 }}
+          end={{ x: 0.9, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
         <LinearGradient colors={["rgba(255,255,255,0.9)", "rgba(255,255,255,0)"]} start={{ x: 0.1, y: 0 }} end={{ x: 0.6, y: 0.5 }} style={StyleSheet.absoluteFill} pointerEvents="none" />
-        <Text style={[styles.eyebrow, ff(fonts, "extraBold")]}>SPEAK ASSIST</Text>
-        <Text style={[styles.heroTitle, ff(fonts, "extraBold")]}>Press and speak naturally.</Text>
-        <View style={styles.voiceStage}>
+        <View style={roomy && styles.heroCopyRoomy}>
+          <Text style={[styles.eyebrow, ff(fonts, "bold")]}>SPEAK ASSIST</Text>
+          <Text style={[styles.heroTitle, roomy && styles.heroTitleRoomy, ff(fonts, "extraBold")]}>Press and speak naturally.</Text>
+        </View>
+        <View style={[styles.voiceStage, roomy && styles.voiceStageRoomy]}>
           <View pointerEvents="none" {...webData({ ring: true })} style={styles.ringWrap}>
             <View style={[styles.ring, { width: 168, height: 168 }]} />
             <View style={[styles.ring, { width: 126, height: 126 }]} />
@@ -213,7 +215,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 
 function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const { width } = useWindowDimensions();
-  const frame = isWeb ? Math.min(width, 412) : width;
+  const frame = Math.min(width, 760);
   const tileWidth = Math.floor((frame - 40 - 12) / 2);
 
   return (
@@ -347,16 +349,23 @@ function Toggle() {
 }
 
 const styles = StyleSheet.create({
-  stage: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#EEF2F8" },
-  appFrame: { width: "100%", height: "100%", maxWidth: isWeb ? 412 : undefined, overflow: "hidden", backgroundColor: colors.cream },
+  stage: { flex: 1, backgroundColor: "#F5F7FB" },
+  appFrame: { flex: 1, width: "100%", height: "100%", overflow: "hidden", backgroundColor: colors.cream },
   blob: { position: "absolute", borderRadius: radius.pill, opacity: 1 },
   blobLemon: { width: 260, height: 260, right: -90, top: -40, backgroundColor: "rgba(255,202,64,0.4)" },
   blobBlue: { width: 320, height: 320, left: -60, bottom: -120, backgroundColor: "rgba(108,170,255,0.34)" },
   content: { flex: 1 },
-  scrollEdge: { position: "absolute", left: 0, right: 0, bottom: 82, height: 36 },
-  scroll: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 44 },
+  scrollEdge: { position: "absolute", left: 0, right: 0, bottom: 88, height: 44 },
+  scroll: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    paddingHorizontal: 22,
+    paddingTop: isWeb ? 30 : 24,
+    paddingBottom: 130
+  },
 
-  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 14, paddingVertical: 12 },
+  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 14, paddingVertical: 14 },
   toolbarText: { flex: 1 },
   h1: { ...type.h1 },
   sub: { ...type.body, marginTop: 3 },
@@ -364,10 +373,14 @@ const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center", flex: 1 },
   flex1: { flex: 1 },
 
-  hero: { minHeight: 290, borderRadius: radius.lg, overflow: "hidden", padding: 20, ...shadow.lemon },
-  eyebrow: { fontSize: 11, lineHeight: 14, fontWeight: "800", letterSpacing: 0.6, color: "#8A6A00" },
-  heroTitle: { fontSize: 24, lineHeight: 29, fontWeight: "800", color: "#2A1F00", marginTop: 6, maxWidth: 230 },
+  hero: { minHeight: 310, borderRadius: radius.lg, overflow: "hidden", padding: 22, ...shadow.lemon },
+  heroRoomy: { minHeight: 360, padding: 30, justifyContent: "space-between" },
+  heroCopyRoomy: { maxWidth: 360 },
+  eyebrow: { fontSize: 11, lineHeight: 14, fontWeight: "700", letterSpacing: 0, color: "#8A6A00" },
+  heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: "800", color: "#2A1F00", marginTop: 7, maxWidth: 310 },
+  heroTitleRoomy: { fontSize: 40, lineHeight: 46, maxWidth: 390 },
   voiceStage: { height: 168, alignItems: "center", justifyContent: "center", marginTop: 4 },
+  voiceStageRoomy: { position: "absolute", right: 48, bottom: 42, width: 220, height: 220 },
   ringWrap: { position: "absolute", alignItems: "center", justifyContent: "center", width: 168, height: 168 },
   ring: { position: "absolute", borderRadius: radius.pill, borderWidth: 1.5, borderColor: "rgba(255,255,255,0.7)" },
   mic: {
@@ -376,15 +389,15 @@ const styles = StyleSheet.create({
   },
   micPressed: { transform: [{ scale: 0.96 }] },
 
-  result: { marginTop: -26, marginHorizontal: 6, padding: 16 },
+  result: { marginTop: -24, marginHorizontal: 8, padding: 18 },
   label: { ...type.label },
-  resultText: { color: colors.ink, fontSize: 17, lineHeight: 22, fontWeight: "700", marginTop: 7 },
+  resultText: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: "700", marginTop: 8 },
   resultActions: { flexDirection: "row", gap: 10, marginTop: 13 },
   playRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   playText: { color: "#1A1400", fontSize: 14, fontWeight: "800" },
   retry: { width: 50, minHeight: 46 },
 
-  sectionLabel: { fontSize: 11, lineHeight: 14, fontWeight: "800", letterSpacing: 0.5, color: colors.soft, marginTop: 18, marginBottom: 10, marginLeft: 4 },
+  sectionLabel: { fontSize: 12, lineHeight: 15, fontWeight: "800", letterSpacing: 0, color: colors.soft, marginTop: 20, marginBottom: 10, marginLeft: 4 },
   rows: { gap: 10 },
   row: { minHeight: 60, paddingHorizontal: 14, paddingVertical: 12 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
