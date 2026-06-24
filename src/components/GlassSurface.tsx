@@ -1,38 +1,103 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import type { PropsWithChildren } from "react";
-import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors, radius, shadow } from "../theme";
+import { colors, glass, radius, shadow } from "../theme";
 
-type GlassSurfaceProps = PropsWithChildren<{
+type Variant = "glass" | "strong" | "nav" | "hi";
+
+const DATA: Record<Variant, object> = {
+  glass: { glass: true },
+  strong: { glassStrong: true },
+  nav: { nav: true },
+  hi: { glasshi: true }
+};
+const BG: Record<Variant, string> = {
+  glass: glass.bg,
+  strong: glass.bgStrong,
+  nav: "rgba(255,255,255,0.20)",
+  hi: glass.bg
+};
+const NATIVE_INTENSITY: Record<Variant, number> = { glass: 26, strong: 42, nav: 22, hi: 26 };
+
+const isWeb = Platform.OS === "web";
+function webData(o: object) {
+  return isWeb ? ({ dataSet: o } as any) : {};
+}
+
+type GlassProps = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   radiusValue?: number;
-  intensity?: number;
+  variant?: Variant;
+  specular?: boolean;
 }>;
 
-const lemonShadow = shadow.lemon;
-
-export function GlassSurface({
+/** Translucent Liquid Glass surface. Web gets backdrop refraction + animated specular via
+ *  injected CSS (see WebGlassFX); native falls back to a BlurView frost. */
+export function Glass({
   children,
   style,
   contentStyle,
-  radiusValue = radius.md,
-  intensity = 42
-}: GlassSurfaceProps) {
+  radiusValue = radius.lg,
+  variant = "glass",
+  specular = true
+}: GlassProps) {
   return (
-    <View style={[styles.shell, { borderRadius: radiusValue }, style]}>
-      <BlurView intensity={intensity} tint="light" style={StyleSheet.absoluteFill} />
+    <View
+      {...webData(DATA[variant])}
+      style={[styles.shell, shadow.glass, { borderRadius: radiusValue, backgroundColor: BG[variant] }, style]}
+    >
+      {!isWeb && <BlurView intensity={NATIVE_INTENSITY[variant]} tint="light" style={StyleSheet.absoluteFill} />}
+      <View pointerEvents="none" style={[styles.rim, { borderRadius: radiusValue }]} />
+      {specular && (
+        <View pointerEvents="none" {...webData({ spec: true })} style={styles.specWrap}>
+          <LinearGradient
+            colors={["rgba(255,255,255,0.98)", "rgba(255,255,255,0.55)", "rgba(255,255,255,0)"]}
+            locations={[0, 0.06, 0.22]}
+            start={{ x: 0.18, y: 0 }}
+            end={{ x: 0.62, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+      )}
+      <View pointerEvents="none" style={styles.glint} />
+      <View style={[styles.content, contentStyle]}>{children}</View>
+    </View>
+  );
+}
+
+/** Opaque, flatter CONTENT surface — deliberately NOT glass, to keep the material hierarchy clear. */
+export function ContentSurface({
+  children,
+  style,
+  contentStyle,
+  radiusValue = radius.md
+}: GlassProps) {
+  return (
+    <View style={[styles.contentShell, shadow.content, { borderRadius: radiusValue }, style]}>
+      <View style={[styles.content, contentStyle]}>{children}</View>
+    </View>
+  );
+}
+
+export function LemonButton({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
+  return (
+    <View style={[styles.lemonButton, style]}>
       <LinearGradient
-        colors={["rgba(255,255,255,0.70)", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.16)"]}
-        locations={[0, 0.46, 1]}
-        start={{ x: 0.05, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={["#FFF3A6", colors.lemon, colors.lemon2]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <View pointerEvents="none" style={[styles.edge, { borderRadius: radiusValue }]} />
-      <View style={[styles.content, contentStyle]}>{children}</View>
+      <LinearGradient
+        colors={["rgba(255,255,255,0.7)", "rgba(255,255,255,0)"]}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.6, y: 0.55 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={[styles.content, styles.center]}>{children}</View>
     </View>
   );
 }
@@ -41,53 +106,53 @@ const styles = StyleSheet.create({
   shell: {
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.88)",
-    backgroundColor: "rgba(255,255,255,0.34)",
-    ...shadow.liquid
+    borderColor: glass.stroke
   },
-  edge: {
+  rim: {
     ...StyleSheet.absoluteFillObject,
     borderWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.96)",
-    borderLeftColor: "rgba(255,255,255,0.84)",
-    borderRightColor: "rgba(255,255,255,0.26)",
-    borderBottomColor: "rgba(255,255,255,0.22)"
+    borderColor: "transparent",
+    borderTopColor: glass.strokeTop,
+    borderLeftColor: "rgba(120,198,255,0.16)",
+    borderRightColor: "rgba(255,188,150,0.14)"
+  },
+  specWrap: {
+    position: "absolute",
+    left: "-14%",
+    right: "-14%",
+    top: 0,
+    bottom: 0
+  },
+  glint: {
+    position: "absolute",
+    top: 1.5,
+    left: "16%",
+    right: "16%",
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.95)"
+  },
+  contentShell: {
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: glass.contentStroke,
+    backgroundColor: glass.content
   },
   content: {
     position: "relative"
   },
-  centerContent: {
+  center: {
     alignItems: "center",
     justifyContent: "center"
   },
   lemonButton: {
-    borderRadius: 20,
-    minHeight: 48,
+    borderRadius: radius.sm,
+    minHeight: 46,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.86)",
+    borderColor: "rgba(255,255,255,0.7)",
     overflow: "hidden",
-    ...lemonShadow
+    ...shadow.lemon
   }
 });
-
-export function LemonButton({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
-  return (
-    <View style={[styles.lemonButton, style]}>
-      <LinearGradient
-        colors={["#FFF8BD", colors.lemon, colors.lemonDeep]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <LinearGradient
-        colors={["rgba(255,255,255,0.74)", "rgba(255,255,255,0)"]}
-        start={{ x: 0.15, y: 0 }}
-        end={{ x: 0.7, y: 0.65 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={[styles.content, styles.centerContent]}>{children}</View>
-    </View>
-  );
-}
