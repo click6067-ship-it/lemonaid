@@ -5,6 +5,21 @@ iOS 26 "Liquid Glass" redesign of the Lemonaid AAC app. Built from
 verified with an adversarial Codex scoring loop against a 100-point rubric
 (see `docs/superpowers/specs/2026-06-25-liquid-glass-redesign-design.md`).
 
+## 2026-06-25 — Restraint pass (anti-"AI-slop")
+Client feedback: the glass-maximalist build (rainbow background blooms, glowing halos,
+animated specular sweeps, translucent low-contrast cards, an invisible lemon-on-lemon mic)
+read as awkward / "AI slop" despite scoring 91 on the *glass-fidelity* rubric. That rubric
+rewarded exactly the noise that looked generated. This pass re-scores against a **"real shipped
+app vs. AI slop"** rubric and executes the project's own "1 hero + calm" philosophy properly:
+- Calm near-solid background (warm-white → light gray); rainbow radials + hairlines removed.
+- Opaque, high-contrast white content cards (`ContentSurface`); animated specular sweeps removed.
+- Lemon is a single disciplined accent (mic + primary button); secondary uses are softened tints.
+- Home mic is now a clearly-legible microphone control (the glyph was painting *under* the
+  absolute-positioned gradient — fixed with a `position:relative`/`zIndex` wrapper).
+- Cards is a real **2-column** grid (was collapsing to 1 column via JS width-math → now `48%` flex).
+- Glass is kept only on the floating nav. Codex (gpt) re-score: **84/100, AI-slop risk LOW**
+  (converged 84→82→84; remaining notes were preference / conflicted with AAC large-target intent).
+
 **Result: both artifacts scored 91/100 (PASS, ≥90) by Codex (gpt-5.5) judging rendered screenshots.**
 - `index.html` — static 4-screen design board (source of truth). Loop: 74→73→82→84→86→88→89→89→**91**.
 - `App.tsx` + `src/*` — the deployed Expo **web** app (`expo export --platform web` → Vercel). **91**.

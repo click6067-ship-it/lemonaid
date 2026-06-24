@@ -1,70 +1,74 @@
 import type { ViewStyle } from "react-native";
 
-// Liquid Glass tokens — mirrors index.html (the design source of truth, Codex-scored 91/100).
+// Calm, high-contrast tokens. Lemon is the SINGLE accent — used only on the mic,
+// primary action, active tab, toggle and avatar. Everything else is clean neutral.
 export const colors = {
-  ink: "#15171F",
-  strong: "#2B3342",
-  muted: "#5B6475",
-  soft: "#97A0B2",
+  ink: "#16181F",     // primary text
+  strong: "#353B47",  // secondary strong / icons
+  muted: "#697080",   // meta text
+  soft: "#9AA1AE",    // placeholder / inactive icon
+  line: "#ECEEF2",    // hairline border
+  line2: "#E3E6EC",   // slightly stronger divider
   white: "#FFFFFF",
+  card: "#FFFFFF",
+  bg: "#F3F4F7",      // app background — calm cool light gray
+  well: "#F1F3F6",    // inset wells inside cards
   cream: "#FFFDF7",
-  lemon: "#FFD749",
-  lemon2: "#F7C821",
-  lemonHi: "#FFF2B0",
-  lemonSoft: "#FFF7B8",
-  // kept only for faint background blooms (not per-card accents anymore)
-  blue: "#6BA5FF",
-  violet: "#9D88FF",
-  aqua: "#6ECEC4"
+  lemon: "#FFCF24",   // accent
+  lemon2: "#F4BE00",  // accent deep (gradient end)
+  lemonHi: "#FFE885",
+  lemonSoft: "#FFF6CE",
+  lemonTint: "#FFFAEC" // very light lemon wash for hero
 };
 
+// Kept for the one remaining glass element (the floating nav). Clean, near-opaque.
 export const glass = {
-  bg: "rgba(255,255,255,0.22)",
-  bgStrong: "rgba(255,255,255,0.42)",
-  stroke: "rgba(255,255,255,0.62)",
+  bg: "rgba(255,255,255,0.62)",
+  bgStrong: "rgba(255,255,255,0.82)",
+  stroke: "rgba(255,255,255,0.9)",
   strokeTop: "rgba(255,255,255,1)",
-  // content (opaque, flatter) surfaces — clearly NOT glass
-  content: "rgba(252,253,255,0.92)",
-  contentStroke: "rgba(231,236,244,0.9)"
+  content: "#FFFFFF",
+  contentStroke: "#ECEEF2"
 };
 
 export const radius = {
-  screen: 44,
-  lg: 28,
-  md: 20,
-  sm: 16,
+  screen: 40,
+  lg: 24,
+  md: 18,
+  sm: 13,
   pill: 999
 };
 
 export const shadow = {
-  // floating glass: soft diffuse + lift
-  glass: {
-    shadowColor: "#1C2640",
-    shadowOpacity: 0.2,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 22 },
-    elevation: 10
-  } satisfies ViewStyle,
-  // content card: flatter, tighter
-  content: {
-    shadowColor: "#1C2640",
+  // clean card lift — soft and tight, no halo
+  card: {
+    shadowColor: "#10131C",
     shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 3
   } satisfies ViewStyle,
+  // floating nav
+  nav: {
+    shadowColor: "#0E1220",
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 12
+  } satisfies ViewStyle,
+  // lemon accent (mic, primary button) — subtle warm lift, not a glow
   lemon: {
-    shadowColor: "#DAAA14",
-    shadowOpacity: 0.3,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 9
+    shadowColor: "#D9A800",
+    shadowOpacity: 0.24,
+    shadowRadius: 13,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 7
   } satisfies ViewStyle
 };
 
 export const type = {
-  h1: { fontSize: 28, lineHeight: 34, fontWeight: "800" as const, color: colors.ink, letterSpacing: 0 },
-  h2: { fontSize: 24, lineHeight: 30, fontWeight: "800" as const, color: colors.ink, letterSpacing: 0 },
-  body: { fontSize: 14, lineHeight: 20, fontWeight: "600" as const, color: colors.muted },
-  label: { fontSize: 12, lineHeight: 15, fontWeight: "800" as const, letterSpacing: 0, color: colors.muted }
+  h1: { fontSize: 27, lineHeight: 33, fontWeight: "800" as const, color: colors.ink, letterSpacing: -0.3 },
+  h2: { fontSize: 22, lineHeight: 28, fontWeight: "800" as const, color: colors.ink, letterSpacing: -0.2 },
+  body: { fontSize: 14, lineHeight: 19, fontWeight: "500" as const, color: colors.muted },
+  label: { fontSize: 12, lineHeight: 15, fontWeight: "700" as const, letterSpacing: 0.3, color: colors.soft }
 };
