@@ -29,7 +29,7 @@ import {
   Waves,
   type LucideIcon
 } from "lucide-react-native";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Image,
   Platform,
@@ -90,30 +90,89 @@ const settingsIcons: Record<string, LucideIcon> = {
   cloud: Cloud
 };
 
-// Static dummy waveform (does not react to live audio); the playback progress
-// sweeps across it when "Play clear voice" is pressed.
 const CLIP_SECONDS = 3.4;
-const WAVE = Array.from({ length: 40 }, (_, i) =>
-  0.28 + (Math.abs(Math.sin(i * 0.7)) * 0.55 + Math.abs(Math.sin(i * 0.29 + 1.1)) * 0.45) * 0.72
-);
+const WAVE_BARS = 88;
 
 function fmtTime(sec: number): string {
   const s = Math.max(0, Math.round(sec));
   return `0:${String(s).padStart(2, "0")}`;
 }
 
-function Waveform({ progress }: { progress: number }) {
+// Deterministic PRNG so a given phrase always renders the same waveform.
+function strSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seeded(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Build a speech-like amplitude envelope from the phrase: each word is a burst
+// of bars (peaking on vowels) separated by low "pause" gaps — longer after
+// punctuation — then resampled to a fixed bar count. Models real voice data
+// shape rather than a uniform sine.
+function buildWave(text: string, bars: number): number[] {
+  const rnd = seeded(strSeed(text));
+  const words = text.replace(/[^A-Za-z0-9\s.,?!']/g, "").split(/\s+/).filter(Boolean);
+  const seg: number[] = [];
+  const gap = (n: number, lvl: number) => {
+    for (let i = 0; i < n; i++) seg.push(Math.max(0.05, lvl + rnd() * 0.05));
+  };
+  gap(1, 0.08);
+  for (const raw of words) {
+    const w = raw.replace(/[.,?!']/g, "");
+    const vowels = (w.match(/[aeiouy]+/gi) || []).length || 1;
+    const len = Math.max(3, Math.min(15, vowels * 3 + Math.floor(w.length * 0.5)));
+    const loud = 0.5 + rnd() * 0.45;
+    for (let i = 0; i < len; i++) {
+      const t = len > 1 ? i / (len - 1) : 0.5;
+      const env = Math.sin(Math.PI * t);
+      const peak = 0.65 + 0.35 * Math.abs(Math.sin(t * Math.PI * vowels));
+      const a = loud * env * peak + (rnd() - 0.5) * 0.16;
+      seg.push(Math.max(0.05, Math.min(1, a)));
+    }
+    const last = raw[raw.length - 1];
+    if (last === "." || last === "?" || last === "!") gap(4, 0.06);
+    else if (last === ",") gap(3, 0.07);
+    else gap(2, 0.09);
+  }
+  gap(1, 0.08);
+  const out: number[] = [];
+  const n = seg.length;
+  for (let i = 0; i < bars; i++) {
+    const x = (i / (bars - 1)) * (n - 1);
+    const lo = Math.floor(x);
+    const hi = Math.min(n - 1, lo + 1);
+    const f = x - lo;
+    out.push(seg[lo] * (1 - f) + seg[hi] * f);
+  }
+  return out;
+}
+
+function Waveform({ wave, progress }: { wave: number[]; progress: number }) {
   return (
-    <View style={styles.wave}>
-      {WAVE.map((h, i) => {
-        const played = (i + 0.5) / WAVE.length <= progress;
-        return (
-          <View
-            key={i}
-            style={[styles.waveBar, { height: 5 + h * 30, backgroundColor: played ? colors.strong : "#DCE0E8" }]}
-          />
-        );
-      })}
+    <View style={styles.waveTrack}>
+      <View style={styles.wave}>
+        {wave.map((h, i) => {
+          const played = (i + 0.5) / wave.length <= progress;
+          return (
+            <View
+              key={i}
+              style={[styles.waveBar, { height: 4 + h * 30, backgroundColor: played ? colors.lemon2 : "#FFFFFF" }]}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -194,6 +253,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[recognizedIndex];
+  const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -249,7 +309,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       <ContentSurface radiusValue={radius.md} style={styles.result}>
         <Text style={[styles.label, ff(fonts, "extraBold")]}>RECOGNIZED</Text>
         <Text style={[styles.resultText, ff(fonts, "bold")]}>{recognized}</Text>
-        <Waveform progress={progress} />
+        <Waveform wave={wave} progress={progress} />
         <View style={styles.timeRow}>
           <Text style={[styles.timeText, ff(fonts, "bold")]}>{fmtTime(progress * CLIP_SECONDS)}</Text>
           <Text style={[styles.timeText, ff(fonts, "bold")]}>{fmtTime(CLIP_SECONDS)}</Text>
@@ -447,8 +507,9 @@ const styles = StyleSheet.create({
     width: 48, minHeight: 48, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.well, borderWidth: 1, borderColor: colors.line
   },
-  wave: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", height: 38, marginTop: 14, marginBottom: 7 },
-  waveBar: { width: 3, borderRadius: 2 },
+  waveTrack: { backgroundColor: "#E6EAF0", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, marginTop: 14, marginBottom: 8 },
+  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 34 },
+  waveBar: { flex: 1, borderRadius: 1 },
   timeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   timeText: { color: colors.muted, fontSize: 11.5, lineHeight: 14, fontWeight: "600" },
 
