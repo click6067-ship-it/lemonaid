@@ -168,7 +168,7 @@ function Waveform({ wave, progress }: { wave: number[]; progress: number }) {
           return (
             <View
               key={i}
-              style={[styles.waveBar, { height: 4 + h * 30, backgroundColor: played ? colors.lemon2 : "#FFFFFF" }]}
+              style={[styles.waveBar, { height: 3 + Math.pow(h, 1.25) * 53, backgroundColor: played ? colors.lemon2 : "#FFFFFF" }]}
             />
           );
         })}
@@ -507,8 +507,8 @@ const styles = StyleSheet.create({
     width: 48, minHeight: 48, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.well, borderWidth: 1, borderColor: colors.line
   },
-  waveTrack: { backgroundColor: "#E6EAF0", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, marginTop: 14, marginBottom: 8 },
-  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 34 },
+  waveTrack: { backgroundColor: "#E6EAF0", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 11, marginTop: 14, marginBottom: 8 },
+  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 58 },
   waveBar: { flex: 1, borderRadius: 1 },
   timeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   timeText: { color: colors.muted, fontSize: 11.5, lineHeight: 14, fontWeight: "600" },
