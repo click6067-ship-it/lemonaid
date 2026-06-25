@@ -8,10 +8,8 @@ import {
   Heart,
   Mic,
   Play,
-  Plus,
   RotateCw,
   Search,
-  Settings,
   SlidersHorizontal,
   Type as TypeIcon,
   User,
@@ -121,16 +119,13 @@ function ff(fonts: FontSet, weight: "regular" | "bold" | "extraBold"): any {
   return fontFamily ? { fontFamily } : undefined;
 }
 
-function Toolbar({ title, sub, icon, fonts, label }: { title: string; sub: string; icon: ReactNode; fonts: FontSet; label: string }) {
+function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: FontSet }) {
   return (
     <View style={styles.toolbar}>
       <View style={styles.toolbarText}>
         <Text style={[styles.h1, ff(fonts, "extraBold")]}>{title}</Text>
         <Text style={[styles.sub, ff(fonts, "bold")]}>{sub}</Text>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={label} style={styles.iconBtn}>
-        {icon}
-      </Pressable>
     </View>
   );
 }
@@ -150,9 +145,6 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
             <Text style={[styles.brandTag, ff(fonts, "bold")]}>Small words, clear voice.</Text>
           </View>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Voice settings" style={styles.iconBtn}>
-          <SlidersHorizontal size={20} color={colors.strong} strokeWidth={2.3} />
-        </Pressable>
       </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.hero} contentStyle={styles.heroInner}>
@@ -195,8 +187,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <Toolbar title="Cards" sub="Tap a phrase to speak." label="Add card" fonts={fonts}
-        icon={<Plus size={22} color={colors.strong} strokeWidth={2.3} />} />
+      <Toolbar title="Cards" sub="Tap a phrase to speak." fonts={fonts} />
 
       <View style={styles.search}>
         <Search size={19} color={colors.soft} strokeWidth={2.3} />
@@ -239,8 +230,7 @@ function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <Toolbar title="Saved" sub="Your fastest phrases." label="Add favorite" fonts={fonts}
-        icon={<Plus size={22} color={colors.strong} strokeWidth={2.3} />} />
+      <Toolbar title="Saved" sub="Your fastest phrases." fonts={fonts} />
 
       <ContentSurface radiusValue={radius.lg} style={styles.stats}>
         <View style={styles.statsHead}>
@@ -275,8 +265,7 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
   const icons: LucideIcon[] = [Waves, SlidersHorizontal, TypeIcon, Grid2X2];
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <Toolbar title="Settings" sub="Voice and access." label="Settings" fonts={fonts}
-        icon={<Settings size={20} color={colors.strong} strokeWidth={2.3} />} />
+      <Toolbar title="Settings" sub="Voice and access." fonts={fonts} />
 
       <ContentSurface radiusValue={radius.lg} style={styles.profile} contentStyle={styles.profileInner}>
         <View style={styles.avatar}>
