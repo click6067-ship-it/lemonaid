@@ -2,22 +2,34 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import {
   Activity,
+  Bath,
+  Bed,
+  Cloud,
+  Contrast,
   Droplet,
+  Flame,
+  Globe,
   Grid2X2,
   Hand,
   Heart,
   Mic,
+  Pill,
   Play,
   RotateCw,
   Search,
   SlidersHorizontal,
+  Smile,
+  Snowflake,
+  ThumbsDown,
+  ThumbsUp,
   Type as TypeIcon,
   User,
   Utensils,
+  Vibrate,
   Waves,
   type LucideIcon
 } from "lucide-react-native";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Image,
   Platform,
@@ -35,7 +47,7 @@ import { WebGlassFX } from "./src/components/WebGlassFX";
 import { categories, favorites, phraseCards, settings as settingRows } from "./src/data";
 import { fontOptions, useOptionalFonts, type FontSet, type FontVariant } from "./src/fontPresets";
 import { colors, radius, shadow, type } from "./src/theme";
-import type { PhraseCard, TabKey } from "./src/types";
+import type { TabKey } from "./src/types";
 
 const isWeb = Platform.OS === "web";
 const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
@@ -50,14 +62,61 @@ const recognitionSamples = [
   "Where is the bathroom?"
 ];
 
-const phraseIcons: Record<PhraseCard["image"], LucideIcon> = {
+const phraseIcons: Record<string, LucideIcon> = {
   help: Hand,
   water: Droplet,
   pain: Activity,
   food: Utensils,
   anxious: Heart,
-  caregiver: User
+  caregiver: User,
+  bathroom: Bath,
+  rest: Bed,
+  medicine: Pill,
+  yes: ThumbsUp,
+  no: ThumbsDown,
+  thanks: Smile,
+  cold: Snowflake,
+  hot: Flame
 };
+
+const settingsIcons: Record<string, LucideIcon> = {
+  voice: Waves,
+  speed: SlidersHorizontal,
+  type: TypeIcon,
+  grid: Grid2X2,
+  haptic: Vibrate,
+  globe: Globe,
+  contrast: Contrast,
+  cloud: Cloud
+};
+
+// Static dummy waveform (does not react to live audio); the playback progress
+// sweeps across it when "Play clear voice" is pressed.
+const CLIP_SECONDS = 3.4;
+const WAVE = Array.from({ length: 40 }, (_, i) =>
+  0.28 + (Math.abs(Math.sin(i * 0.7)) * 0.55 + Math.abs(Math.sin(i * 0.29 + 1.1)) * 0.45) * 0.72
+);
+
+function fmtTime(sec: number): string {
+  const s = Math.max(0, Math.round(sec));
+  return `0:${String(s).padStart(2, "0")}`;
+}
+
+function Waveform({ progress }: { progress: number }) {
+  return (
+    <View style={styles.wave}>
+      {WAVE.map((h, i) => {
+        const played = (i + 0.5) / WAVE.length <= progress;
+        return (
+          <View
+            key={i}
+            style={[styles.waveBar, { height: 5 + h * 30, backgroundColor: played ? colors.strong : "#DCE0E8" }]}
+          />
+        );
+      })}
+    </View>
+  );
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab());
@@ -132,8 +191,32 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
 
 function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [recognizedIndex, setRecognizedIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[recognizedIndex];
-  const cycle = () => setRecognizedIndex((i) => (i + 1) % recognitionSamples.length);
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+  const cycle = () => {
+    stopTimer();
+    setProgress(0);
+    setRecognizedIndex((i) => (i + 1) % recognitionSamples.length);
+  };
+  const playClear = () => {
+    stopTimer();
+    setProgress(0);
+    const startedAt = Date.now();
+    timerRef.current = setInterval(() => {
+      const p = Math.min(1, (Date.now() - startedAt) / (CLIP_SECONDS * 1000));
+      setProgress(p);
+      if (p >= 1) stopTimer();
+    }, 40);
+  };
+  useEffect(() => stopTimer, []);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -166,8 +249,13 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       <ContentSurface radiusValue={radius.md} style={styles.result}>
         <Text style={[styles.label, ff(fonts, "extraBold")]}>RECOGNIZED</Text>
         <Text style={[styles.resultText, ff(fonts, "bold")]}>{recognized}</Text>
+        <Waveform progress={progress} />
+        <View style={styles.timeRow}>
+          <Text style={[styles.timeText, ff(fonts, "bold")]}>{fmtTime(progress * CLIP_SECONDS)}</Text>
+          <Text style={[styles.timeText, ff(fonts, "bold")]}>{fmtTime(CLIP_SECONDS)}</Text>
+        </View>
         <View style={styles.resultActions}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Play clear voice" style={styles.flex1}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Play clear voice" onPress={playClear} style={styles.flex1}>
             <LemonButton>
               <View style={styles.playRow}>
                 <Play size={17} color="#1A1400" fill="#1A1400" />
@@ -175,7 +263,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
               </View>
             </LemonButton>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Try again" onPress={cycle} style={styles.retry}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Restart" onPress={() => { stopTimer(); setProgress(0); }} style={styles.retry}>
             <RotateCw size={19} color={colors.strong} strokeWidth={2.3} />
           </Pressable>
         </View>
@@ -236,7 +324,7 @@ function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         <View style={styles.statsHead}>
           <Text style={[styles.label, ff(fonts, "extraBold")]}>THIS WEEK</Text>
           <View style={styles.statsPill}>
-            <Text style={[styles.statsPillText, ff(fonts, "extraBold")]}>12 saved</Text>
+            <Text style={[styles.statsPillText, ff(fonts, "extraBold")]}>{favorites.length} saved</Text>
           </View>
         </View>
         <Text style={[styles.statsBig, ff(fonts, "extraBold")]}>42 phrases spoken</Text>
@@ -262,7 +350,6 @@ function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 }
 
 function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
-  const icons: LucideIcon[] = [Waves, SlidersHorizontal, TypeIcon, Grid2X2];
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
       <Toolbar title="Settings" sub="Voice and access." fonts={fonts} />
@@ -280,9 +367,8 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
 
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>PREFERENCES</Text>
       <View style={styles.rows}>
-        {settingRows.map((row, index) => {
-          const Icon = icons[index];
-          const toggle = index === 2;
+        {settingRows.map((row) => {
+          const Icon = settingsIcons[row.icon] ?? SlidersHorizontal;
           return (
             <ContentSurface key={row.title} radiusValue={radius.md} style={styles.setRow} contentStyle={styles.setRowInner}>
               <View style={styles.setWell}>
@@ -292,7 +378,7 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
                 <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{row.title}</Text>
                 <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{row.value}</Text>
               </View>
-              {toggle ? <Toggle /> : <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>}
+              {row.toggle !== undefined ? <Toggle on={row.toggle} /> : <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>}
             </ContentSurface>
           );
         })}
@@ -301,11 +387,11 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
   );
 }
 
-function Toggle() {
+function Toggle({ on }: { on: boolean }) {
   return (
-    <View style={styles.toggle}>
-      <LinearGradient colors={[colors.lemonHi, colors.lemon]} style={StyleSheet.absoluteFill} />
-      <View style={styles.toggleKnob} />
+    <View style={[styles.toggle, !on && styles.toggleOff]}>
+      {on && <LinearGradient colors={[colors.lemonHi, colors.lemon]} style={StyleSheet.absoluteFill} />}
+      <View style={[styles.toggleKnob, !on && styles.toggleKnobOff]} />
     </View>
   );
 }
@@ -361,6 +447,10 @@ const styles = StyleSheet.create({
     width: 48, minHeight: 48, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.well, borderWidth: 1, borderColor: colors.line
   },
+  wave: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", height: 38, marginTop: 14, marginBottom: 7 },
+  waveBar: { width: 3, borderRadius: 2 },
+  timeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
+  timeText: { color: colors.muted, fontSize: 11.5, lineHeight: 14, fontWeight: "600" },
 
   sectionLabel: { fontSize: 12, lineHeight: 15, fontWeight: "800", letterSpacing: 0.6, color: colors.soft, marginTop: 24, marginBottom: 12, marginLeft: 4 },
   rows: { gap: 10 },
@@ -414,5 +504,7 @@ const styles = StyleSheet.create({
   setWell: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: colors.well },
   chev: { color: colors.muted, fontSize: 22, fontWeight: "600" },
   toggle: { width: 46, height: 28, borderRadius: radius.pill, overflow: "hidden", justifyContent: "center", padding: 3 },
+  toggleOff: { backgroundColor: "#E3E6EC" },
+  toggleKnobOff: { marginLeft: 0 },
   toggleKnob: { width: 22, height: 22, marginLeft: "auto", borderRadius: radius.pill, backgroundColor: colors.white, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 }
 });
