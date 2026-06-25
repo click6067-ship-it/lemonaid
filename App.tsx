@@ -21,6 +21,7 @@ import {
 } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import {
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -40,6 +41,9 @@ import type { PhraseCard, TabKey } from "./src/types";
 
 const isWeb = Platform.OS === "web";
 const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
+
+const logo = require("./assets/logo.png");
+const lemonPhoto = require("./assets/lemon-photo.png");
 
 const recognitionSamples = [
   "I need water. Please speak slowly.",
@@ -138,26 +142,33 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <Toolbar title="Good morning" sub="Small words, clear voice." label="Voice settings" fonts={fonts}
-        icon={<SlidersHorizontal size={20} color={colors.strong} strokeWidth={2.3} />} />
+      <View style={styles.brandBar}>
+        <View style={styles.brandLeft}>
+          <Image source={logo} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Lemonaid logo" />
+          <View>
+            <Text style={[styles.brandName, ff(fonts, "extraBold")]}>Lemonaid</Text>
+            <Text style={[styles.brandTag, ff(fonts, "bold")]}>Small words, clear voice.</Text>
+          </View>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Voice settings" style={styles.iconBtn}>
+          <SlidersHorizontal size={20} color={colors.strong} strokeWidth={2.3} />
+        </Pressable>
+      </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.hero} contentStyle={styles.heroInner}>
-        <Text style={[styles.eyebrow, ff(fonts, "bold")]}>SPEAK ASSIST</Text>
-        <Text style={[styles.heroTitle, ff(fonts, "extraBold")]}>Press, then speak naturally.</Text>
-
-        <View style={styles.voiceStage}>
-          <View pointerEvents="none" {...webData({ ring: true })} style={styles.ringWrap}>
-            <View style={[styles.ring, { width: 130, height: 130 }]} />
-          </View>
-          <Pressable accessibilityRole="button" accessibilityLabel="Start listening" onPress={cycle} style={({ pressed }) => [styles.mic, pressed && styles.micPressed]}>
-            <LinearGradient colors={[colors.lemon, colors.lemon2]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={StyleSheet.absoluteFill} />
-            <View style={styles.micGlyph}>
-              <Mic size={44} color="#1A1400" strokeWidth={2.6} />
-            </View>
-          </Pressable>
+        <View style={styles.heroPhotoWrap}>
+          <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-
-        <Text style={[styles.heroHint, ff(fonts, "bold")]}>Tap the mic, then speak slowly.</Text>
+        <Text style={[styles.heroTitle, ff(fonts, "extraBold")]}>Press, then speak.</Text>
+        <Text style={[styles.heroSub, ff(fonts, "bold")]}>Tap below and speak slowly — we’ll say it out loud, clearly.</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Tap to speak" onPress={cycle} style={styles.speakPress}>
+          <LemonButton style={styles.speakBtn}>
+            <View style={styles.playRow}>
+              <Mic size={20} color="#1A1400" strokeWidth={2.5} />
+              <Text style={[styles.speakText, ff(fonts, "extraBold")]}>Tap to speak</Text>
+            </View>
+          </LemonButton>
+        </Pressable>
       </ContentSurface>
 
       <ContentSurface radiusValue={radius.md} style={styles.result}>
@@ -335,20 +346,20 @@ const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center", flex: 1 },
   flex1: { flex: 1 },
 
-  hero: { backgroundColor: colors.lemonTint, borderColor: "rgba(244,190,0,0.16)" },
-  heroInner: { padding: 24, alignItems: "center" },
-  eyebrow: { fontSize: 11, lineHeight: 14, fontWeight: "800", letterSpacing: 1.4, color: "#A07C00", alignSelf: "flex-start" },
-  heroTitle: { fontSize: 22, lineHeight: 28, fontWeight: "800", color: colors.ink, marginTop: 8, alignSelf: "flex-start", maxWidth: 280, letterSpacing: -0.2 },
-  voiceStage: { height: 170, width: "100%", alignItems: "center", justifyContent: "center", marginTop: 4 },
-  ringWrap: { position: "absolute", alignItems: "center", justifyContent: "center", width: 130, height: 130 },
-  ring: { position: "absolute", borderRadius: radius.pill, borderWidth: 1.5, borderColor: "rgba(244,190,0,0.22)" },
-  mic: {
-    width: 96, height: 96, borderRadius: radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center",
-    borderWidth: 3, borderColor: "rgba(255,255,255,0.95)", ...shadow.lemon
-  },
-  micGlyph: { position: "relative", zIndex: 1, alignItems: "center", justifyContent: "center" },
-  micPressed: { transform: [{ scale: 0.95 }] },
-  heroHint: { color: colors.muted, fontSize: 13, lineHeight: 17, fontWeight: "600", marginTop: 8 },
+  brandBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 6, marginBottom: 16 },
+  brandLeft: { flexDirection: "row", alignItems: "center", gap: 11 },
+  brandLogo: { width: 42, height: 42 },
+  brandName: { fontSize: 20, lineHeight: 24, fontWeight: "800", color: colors.ink, letterSpacing: -0.3 },
+  brandTag: { fontSize: 12.5, lineHeight: 16, fontWeight: "600", color: colors.muted, marginTop: 1 },
+  hero: {},
+  heroInner: { padding: 22, alignItems: "center" },
+  heroPhotoWrap: { width: 150, height: 150, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, marginTop: 6, ...shadow.card },
+  heroPhoto: { width: "100%", height: "100%" },
+  heroTitle: { fontSize: 23, lineHeight: 29, fontWeight: "800", color: colors.ink, marginTop: 18, textAlign: "center", letterSpacing: -0.3 },
+  heroSub: { fontSize: 14, lineHeight: 19, fontWeight: "600", color: colors.muted, marginTop: 7, textAlign: "center", maxWidth: 290 },
+  speakPress: { width: "100%", marginTop: 18 },
+  speakBtn: { width: "100%", minHeight: 56 },
+  speakText: { color: "#1A1400", fontSize: 16, fontWeight: "800" },
 
   result: { marginTop: 14, padding: 18 },
   label: { ...type.label },

@@ -14,6 +14,11 @@ const tabs = [
 const isWeb = Platform.OS === "web";
 const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
 
+// Active tab "color comes in" (Online Groceries-style): the selected icon + label
+// light up in a legible lemon-gold; inactive stay neutral gray.
+const ACTIVE_ICON = "#E3A300";
+const ACTIVE_LABEL = "#7E6200";
+
 type BottomNavProps = {
   activeTab: TabKey;
   onChange: (tab: TabKey) => void;
@@ -35,12 +40,12 @@ export function BottomNav({ activeTab, onChange }: BottomNavProps) {
               onPress={() => onChange(key)}
               style={styles.tab}
             >
-              <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
+              <View style={styles.iconWrap}>
                 <Icon
-                  size={22}
-                  color={active ? colors.ink : colors.soft}
-                  strokeWidth={active ? 2.4 : 2}
-                  fill={active && key === "saved" ? colors.ink : "none"}
+                  size={23}
+                  color={active ? ACTIVE_ICON : colors.soft}
+                  strokeWidth={active ? 2.6 : 2}
+                  fill={active && key === "saved" ? ACTIVE_ICON : "none"}
                 />
               </View>
               <Text numberOfLines={1} style={[styles.label, active && styles.labelActive]}>{label}</Text>
@@ -87,9 +92,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
-  iconWrapActive: {
-    backgroundColor: "rgba(255,207,36,0.16)"
-  },
   label: {
     color: colors.soft,
     fontSize: 11,
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0
   },
   labelActive: {
-    color: colors.ink,
+    color: ACTIVE_LABEL,
     fontWeight: "700"
   }
 });
