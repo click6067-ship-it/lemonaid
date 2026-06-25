@@ -161,18 +161,16 @@ function buildWave(text: string, bars: number): number[] {
 
 function Waveform({ wave, progress }: { wave: number[]; progress: number }) {
   return (
-    <View style={styles.waveTrack}>
-      <View style={styles.wave}>
-        {wave.map((h, i) => {
-          const played = (i + 0.5) / wave.length <= progress;
-          return (
-            <View
-              key={i}
-              style={[styles.waveBar, { height: 3 + Math.pow(h, 1.25) * 53, backgroundColor: played ? colors.lemon2 : "#FFFFFF" }]}
-            />
-          );
-        })}
-      </View>
+    <View style={styles.wave}>
+      {wave.map((h, i) => {
+        const played = (i + 0.5) / wave.length <= progress;
+        return (
+          <View
+            key={i}
+            style={[styles.waveBar, { height: 3 + Math.pow(h, 1.25) * 53, backgroundColor: played ? colors.lemon2 : "#CBD0D8" }]}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -507,8 +505,7 @@ const styles = StyleSheet.create({
     width: 48, minHeight: 48, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.well, borderWidth: 1, borderColor: colors.line
   },
-  waveTrack: { backgroundColor: "#E6EAF0", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 11, marginTop: 14, marginBottom: 8 },
-  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 58 },
+  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 58, marginTop: 16, marginBottom: 10 },
   waveBar: { flex: 1, borderRadius: 1 },
   timeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   timeText: { color: colors.muted, fontSize: 11.5, lineHeight: 14, fontWeight: "600" },
