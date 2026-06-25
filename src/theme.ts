@@ -14,11 +14,11 @@ export const colors = {
   bg: "#F3F4F7",      // app background — calm cool light gray
   well: "#F1F3F6",    // inset wells inside cards
   cream: "#FFFDF7",
-  lemon: "#FFCF24",   // accent
-  lemon2: "#F4BE00",  // accent deep (gradient end)
-  lemonHi: "#FFE885",
-  lemonSoft: "#FFF6CE",
-  lemonTint: "#FFFAEC" // very light lemon wash for hero
+  lemon: "#FFE066",   // accent — softer, lighter yellow
+  lemon2: "#FBD24B",  // accent deep (gradient end)
+  lemonHi: "#FFF0AE",
+  lemonSoft: "#FFF8DE",
+  lemonTint: "#FFFCF0" // very light lemon wash for hero
 };
 
 // Kept for the one remaining glass element (the floating nav). Clean, near-opaque.

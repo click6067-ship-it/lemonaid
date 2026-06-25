@@ -330,6 +330,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 600,
     alignSelf: "center",
+    flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: isWeb ? 26 : 22,
     paddingBottom: 124
@@ -351,9 +352,9 @@ const styles = StyleSheet.create({
   brandLogo: { width: 42, height: 42 },
   brandName: { fontSize: 20, lineHeight: 24, fontWeight: "800", color: colors.ink, letterSpacing: -0.3 },
   brandTag: { fontSize: 12.5, lineHeight: 16, fontWeight: "600", color: colors.muted, marginTop: 1 },
-  hero: {},
-  heroInner: { padding: 22, alignItems: "center" },
-  heroPhotoWrap: { width: 150, height: 150, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, marginTop: 6, ...shadow.card },
+  hero: { flex: 1 },
+  heroInner: { flex: 1, padding: 22, alignItems: "center", justifyContent: "center" },
+  heroPhotoWrap: { width: 172, height: 172, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, ...shadow.card },
   heroPhoto: { width: "100%", height: "100%" },
   heroTitle: { fontSize: 23, lineHeight: 29, fontWeight: "800", color: colors.ink, marginTop: 18, textAlign: "center", letterSpacing: -0.3 },
   heroSub: { fontSize: 14, lineHeight: 19, fontWeight: "600", color: colors.muted, marginTop: 7, textAlign: "center", maxWidth: 290 },
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
   rowMeta: { color: colors.muted, fontSize: 12.5, lineHeight: 16, fontWeight: "600", marginTop: 3 },
   playMini: {
     width: 36, height: 36, borderRadius: radius.pill, alignItems: "center", justifyContent: "center",
-    backgroundColor: "rgba(255,207,36,0.18)"
+    backgroundColor: "rgba(255,224,102,0.36)"
   },
 
   search: {
@@ -407,7 +408,7 @@ const styles = StyleSheet.create({
 
   stats: { padding: 22, minHeight: 124 },
   statsHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  statsPill: { paddingHorizontal: 11, height: 25, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,207,36,0.20)" },
+  statsPill: { paddingHorizontal: 11, height: 25, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,224,102,0.40)" },
   statsPillText: { color: "#6E5200", fontSize: 12, fontWeight: "800" },
   statsBig: { color: colors.ink, fontSize: 25, lineHeight: 31, fontWeight: "800", marginTop: 10, maxWidth: 230, letterSpacing: -0.3 },
   statsMeta: { color: colors.muted, fontSize: 13, lineHeight: 18, fontWeight: "600", marginTop: 8 },

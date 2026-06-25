@@ -31,7 +31,7 @@ export function WebGlassFX() {
       }
       [data-appbg]{
         background-image:
-          radial-gradient(120% 38% at 50% -8%, rgba(255,207,36,.10), transparent 60%),
+          radial-gradient(120% 38% at 50% -8%, rgba(255,224,102,.14), transparent 60%),
           linear-gradient(180deg, #FAFBFC 0%, #F3F4F7 46%, #F3F4F7 100%);
       }
     `;
