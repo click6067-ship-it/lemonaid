@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   rowMeta: { color: colors.muted, fontSize: 12.5, lineHeight: 16, fontWeight: "600", marginTop: 3 },
   playMini: {
     width: 36, height: 36, borderRadius: radius.pill, alignItems: "center", justifyContent: "center",
-    backgroundColor: "rgba(255,224,102,0.36)"
+    backgroundColor: "rgba(255,233,140,0.46)"
   },
 
   search: {
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
 
   stats: { padding: 22, minHeight: 124 },
   statsHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  statsPill: { paddingHorizontal: 11, height: 25, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,224,102,0.40)" },
+  statsPill: { paddingHorizontal: 11, height: 25, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,233,140,0.52)" },
   statsPillText: { color: "#6E5200", fontSize: 12, fontWeight: "800" },
   statsBig: { color: colors.ink, fontSize: 25, lineHeight: 31, fontWeight: "800", marginTop: 10, maxWidth: 230, letterSpacing: -0.3 },
   statsMeta: { color: colors.muted, fontSize: 13, lineHeight: 18, fontWeight: "600", marginTop: 8 },

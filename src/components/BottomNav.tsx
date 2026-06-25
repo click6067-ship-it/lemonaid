@@ -16,8 +16,8 @@ const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
 
 // Active tab "color comes in" (Online Groceries-style): the selected icon + label
 // light up in a legible lemon-gold; inactive stay neutral gray.
-const ACTIVE_ICON = "#E3A300";
-const ACTIVE_LABEL = "#7E6200";
+const ACTIVE_ICON = "#EFC23F";
+const ACTIVE_LABEL = "#8C6E14";
 
 type BottomNavProps = {
   activeTab: TabKey;
