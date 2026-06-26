@@ -235,7 +235,7 @@ export default function App() {
         {/* soft fade just above the floating nav (content scrolls under it) */}
         <LinearGradient
           pointerEvents="none"
-          colors={["rgba(243,244,247,0)", "rgba(243,244,247,0.92)"]}
+          colors={["rgba(246,243,236,0)", "rgba(246,243,236,0.92)"]}
           style={styles.scrollEdge}
         />
         <BottomNav activeTab={activeTab} onChange={setActiveTab} />
@@ -254,8 +254,8 @@ function getInitialTab(): TabKey {
 function getInitialFont(): FontVariant {
   if (!isWeb || typeof window === "undefined") return "ios";
   const font = new URLSearchParams(window.location.search).get("font");
-  if (font === "ios" || font === "geist" || font === "jakarta") return font;
-  return "ios";
+  if (font === "ios" || font === "jakarta") return font;
+  return "jakarta";
 }
 
 function ff(fonts: FontSet, weight: "regular" | "bold" | "extraBold"): any {
