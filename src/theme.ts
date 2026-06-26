@@ -5,8 +5,8 @@ import type { ViewStyle } from "react-native";
 export const colors = {
   ink: "#16181F",     // primary text
   strong: "#353B47",  // secondary strong / icons
-  muted: "#697080",   // meta text
-  soft: "#9AA1AE",    // placeholder / inactive icon
+  muted: "#5C6370",   // meta text — darkened to ~6:1 (was #697080) for AA legibility
+  soft: "#6E7682",    // labels / placeholder / inactive icon — ~4.6:1 (was #9AA1AE, ~2.5:1, sub-AA)
   line: "#ECEEF2",    // hairline border
   line2: "#E3E6EC",   // slightly stronger divider
   white: "#FFFFFF",
