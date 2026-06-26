@@ -4,6 +4,8 @@ import {
   Activity,
   Bath,
   Bed,
+  Check,
+  ChevronLeft,
   Cloud,
   Contrast,
   Droplet,
@@ -12,7 +14,6 @@ import {
   Grid2X2,
   Hand,
   Heart,
-  Mic,
   Pill,
   Play,
   RotateCw,
@@ -31,12 +32,14 @@ import {
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  Animated,
   Image,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   useWindowDimensions
 } from "react-native";
@@ -47,7 +50,7 @@ import { WebGlassFX } from "./src/components/WebGlassFX";
 import { categories, favorites, phraseCards, settings as settingRows } from "./src/data";
 import { fontOptions, useOptionalFonts, type FontSet, type FontVariant } from "./src/fontPresets";
 import { colors, radius, shadow, type } from "./src/theme";
-import type { TabKey } from "./src/types";
+import type { PhraseCard, TabKey } from "./src/types";
 
 const isWeb = Platform.OS === "web";
 const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
@@ -88,6 +91,20 @@ const settingsIcons: Record<string, LucideIcon> = {
   globe: Globe,
   contrast: Contrast,
   cloud: Cloud
+};
+
+// Home board: a small curated set of the most-needed phrases (tap → speak via TTS).
+const byImg = (img: string) => phraseCards.find((c) => c.image === img) as PhraseCard;
+const HOME_URGENT = ["help", "pain", "caregiver"].map(byImg);
+const HOME_QUICK = ["water", "bathroom", "rest", "medicine", "thanks", "yes"].map(byImg);
+
+// Selectable options for each drill-down Settings detail screen.
+const SETTING_OPTIONS: Record<string, string[]> = {
+  "Voice Style": ["Natural, warm", "Bright & clear", "Calm & low", "Expressive"],
+  "Speech Speed": ["Slow", "Medium slow", "Medium", "Fast"],
+  "Card Library": ["Everyday needs", "Health & care", "Food & drink", "Feelings & comfort", "Social"],
+  "Voice Language": ["English (US)", "English (UK)", "한국어", "Español", "Français", "日本語"],
+  "Backup & Sync": ["iCloud", "Google Drive", "Off"]
 };
 
 const CLIP_SECONDS = 3.4;
@@ -203,6 +220,50 @@ function Waveform({ wave, progress }: { wave: number[]; progress: number }) {
   );
 }
 
+// Reusable phrase tile (Home quick grid + Cards grid): tap → speak via TTS.
+function SpeakTile({ card, fonts }: { card: PhraseCard; fonts: FontSet }) {
+  const Icon = phraseIcons[card.image];
+  return (
+    <Pressable
+      onPress={() => speakPhrase(card.phrase)}
+      accessibilityRole="button"
+      accessibilityLabel={`Speak ${card.phrase}`}
+      style={({ pressed }) => [styles.tile, pressed && styles.cardPressed]}
+    >
+      <ContentSurface radiusValue={radius.md} style={styles.card} contentStyle={styles.cardInner}>
+        <View style={styles.cardWell}>
+          <Icon size={24} color={colors.ink} strokeWidth={2.4} />
+        </View>
+        <View>
+          <Text style={[styles.cardTitle, ff(fonts, "bold")]}>{card.phrase}</Text>
+          <Text style={[styles.cardCat, ff(fonts, "bold")]}>{card.category}</Text>
+        </View>
+      </ContentSurface>
+    </Pressable>
+  );
+}
+
+// Full-width urgent phrase row (Home), warm-tinted to stand apart from quick phrases.
+function UrgentRow({ card, fonts }: { card: PhraseCard; fonts: FontSet }) {
+  const Icon = phraseIcons[card.image];
+  return (
+    <Pressable
+      onPress={() => speakPhrase(card.phrase)}
+      accessibilityRole="button"
+      accessibilityLabel={`Speak ${card.phrase}`}
+      style={({ pressed }) => pressed && styles.cardPressed}
+    >
+      <View style={styles.urgentRow}>
+        <View style={styles.urgentWell}>
+          <Icon size={22} color="#8A3D10" strokeWidth={2.5} />
+        </View>
+        <Text style={[styles.urgentText, ff(fonts, "extraBold")]} numberOfLines={1}>{card.phrase}</Text>
+        <Play size={16} color="#8A3D10" fill="#8A3D10" />
+      </View>
+    </Pressable>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab());
   const fontsLoaded = useOptionalFonts();
@@ -275,10 +336,9 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
 }
 
 function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
-  const [recognizedIndex, setRecognizedIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const recognized = recognitionSamples[recognizedIndex];
+  const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
 
   const stopTimer = () => {
@@ -286,11 +346,6 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  };
-  const cycle = () => {
-    stopTimer();
-    setProgress(0);
-    setRecognizedIndex((i) => (i + 1) % recognitionSamples.length);
   };
   const playClear = () => {
     stopTimer();
@@ -317,24 +372,30 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         </View>
       </View>
 
-      <ContentSurface radiusValue={radius.lg} style={styles.hero} contentStyle={styles.heroInner}>
-        <View style={styles.heroPhotoWrap}>
+      <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
+        <View style={styles.heroPhotoWrapSm}>
           <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-        <Text style={[styles.heroTitle, ff(fonts, "extraBold")]}>Press, then speak.</Text>
-        <Text style={[styles.heroSub, ff(fonts, "bold")]}>Tap below and speak slowly — we’ll say it out loud, clearly.</Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="Tap to speak" onPress={cycle} style={styles.speakPress}>
-          <LemonButton style={styles.speakBtn}>
-            <View style={styles.playRow}>
-              <Mic size={20} color="#1A1400" strokeWidth={2.5} />
-              <Text style={[styles.speakText, ff(fonts, "extraBold")]}>Tap to speak</Text>
-            </View>
-          </LemonButton>
-        </Pressable>
+        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Tap a phrase to say it out loud.</Text>
+        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>We’ll speak it clearly, for you.</Text>
       </ContentSurface>
 
+      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>IF YOU NEED HELP</Text>
+      <View style={styles.rows}>
+        {HOME_URGENT.map((card) => (
+          <UrgentRow key={card.phrase} card={card} fonts={fonts} />
+        ))}
+      </View>
+
+      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>QUICK PHRASES</Text>
+      <View style={styles.grid}>
+        {HOME_QUICK.map((card) => (
+          <SpeakTile key={card.phrase} card={card} fonts={fonts} />
+        ))}
+      </View>
+
+      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>OR SPEAK IN YOUR OWN WORDS</Text>
       <ContentSurface radiusValue={radius.md} style={styles.result}>
-        <Text style={[styles.label, ff(fonts, "extraBold")]}>RECOGNIZED</Text>
         <Text style={[styles.resultText, ff(fonts, "bold")]}>{recognized}</Text>
         <Waveform wave={wave} progress={progress} />
         <View style={styles.timeRow}>
@@ -361,15 +422,27 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 
 function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [activeCat, setActiveCat] = useState(categories[0]);
-  const shown = activeCat === "All" ? phraseCards : phraseCards.filter((c) => c.category === activeCat);
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const shown = phraseCards.filter(
+    (c) => (activeCat === "All" || c.category === activeCat) && (q === "" || c.phrase.toLowerCase().includes(q))
+  );
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
       <Toolbar title="Cards" sub="Tap a phrase to speak." fonts={fonts} />
 
       <View style={styles.search}>
         <Search size={19} color={colors.soft} strokeWidth={2.3} />
-        <Text style={[styles.searchText, ff(fonts, "bold")]}>Search phrases</Text>
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search phrases"
+          placeholderTextColor={colors.soft}
+          style={[styles.searchInput, ff(fonts, "bold")]}
+          accessibilityLabel="Search phrases"
+          returnKeyType="search"
+        />
       </View>
 
       <View style={styles.chips}>
@@ -389,24 +462,15 @@ function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         })}
       </View>
 
-      <View style={styles.grid}>
-        {shown.map((card) => {
-          const Icon = phraseIcons[card.image];
-          return (
-            <Pressable key={card.phrase} onPress={() => speakPhrase(card.phrase)} accessibilityRole="button" accessibilityLabel={`Speak ${card.phrase}`} style={({ pressed }) => [styles.tile, pressed && styles.cardPressed]}>
-              <ContentSurface radiusValue={radius.md} style={styles.card} contentStyle={styles.cardInner}>
-                <View style={styles.cardWell}>
-                  <Icon size={24} color={colors.ink} strokeWidth={2.4} />
-                </View>
-                <View>
-                  <Text style={[styles.cardTitle, ff(fonts, "bold")]}>{card.phrase}</Text>
-                  <Text style={[styles.cardCat, ff(fonts, "bold")]}>{card.category}</Text>
-                </View>
-              </ContentSurface>
-            </Pressable>
-          );
-        })}
-      </View>
+      {shown.length === 0 ? (
+        <Text style={[styles.emptyText, ff(fonts, "bold")]}>No phrases match “{query}”.</Text>
+      ) : (
+        <View style={styles.grid}>
+          {shown.map((card) => (
+            <SpeakTile key={card.phrase} card={card} fonts={fonts} />
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -453,62 +517,155 @@ function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   );
 }
 
+// Detail (sub-)settings screen that slides in from the right when a row is tapped.
+function SettingsDetail({
+  title,
+  options,
+  selected,
+  onBack,
+  onChoose,
+  fonts
+}: {
+  title: string;
+  options: string[];
+  selected: string;
+  onBack: () => void;
+  onChoose: (opt: string) => void;
+  fonts: FontSet;
+}) {
+  const base = (selected.split("·")[0] || "").trim();
+  return (
+    <View style={styles.flex1}>
+      <View style={styles.detailHeader}>
+        <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back to Settings" style={styles.detailBack}>
+          <ChevronLeft size={24} color={colors.ink} strokeWidth={2.5} />
+          <Text style={[styles.detailBackText, ff(fonts, "bold")]}>Settings</Text>
+        </Pressable>
+      </View>
+      <ScrollView style={styles.flex1} contentContainerStyle={styles.detailScroll} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.detailTitle, ff(fonts, "extraBold")]}>{title}</Text>
+        <View style={styles.rows}>
+          {options.map((opt) => {
+            const active = selected === opt || base === opt;
+            return (
+              <Pressable
+                key={opt}
+                onPress={() => onChoose(opt)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={opt}
+                style={({ pressed }) => pressed && styles.cardPressed}
+              >
+                <ContentSurface radiusValue={radius.md} style={styles.optRow} contentStyle={styles.optInner}>
+                  <Text style={[styles.optText, ff(fonts, "bold")]}>{opt}</Text>
+                  {active ? <Check size={20} color={colors.ink} strokeWidth={2.7} /> : <View style={styles.optDot} />}
+                </ContentSurface>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
 function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
+  const { width } = useWindowDimensions();
   const [toggles, setToggles] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(
-      settingRows.filter((r) => r.toggle !== undefined).map((r) => [r.title, r.toggle as boolean])
-    )
+    Object.fromEntries(settingRows.filter((r) => r.toggle !== undefined).map((r) => [r.title, r.toggle as boolean]))
   );
   const flip = (title: string) => setToggles((t) => ({ ...t, [title]: !t[title] }));
 
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(settingRows.filter((r) => r.toggle === undefined).map((r) => [r.title, r.value]))
+  );
+  const [detail, setDetail] = useState<string | null>(null);
+  const tx = useRef(new Animated.Value(width)).current;
+
+  const openDetail = (title: string) => {
+    tx.setValue(width);
+    setDetail(title);
+    Animated.timing(tx, { toValue: 0, duration: 280, useNativeDriver: !isWeb }).start();
+  };
+  const closeDetail = () => {
+    Animated.timing(tx, { toValue: width, duration: 240, useNativeDriver: !isWeb }).start(({ finished }) => {
+      if (finished) setDetail(null);
+    });
+  };
+  const choose = (title: string, opt: string) => {
+    setValues((v) => ({ ...v, [title]: opt }));
+    closeDetail();
+  };
+
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <Toolbar title="Settings" sub="Voice and access." fonts={fonts} />
+    <View style={styles.flex1}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <Toolbar title="Settings" sub="Voice and access." fonts={fonts} />
 
-      <ContentSurface radiusValue={radius.lg} style={styles.profile} contentStyle={styles.profileInner}>
-        <View style={styles.avatar}>
-          <LinearGradient colors={[colors.lemonHi, colors.lemon]} start={{ x: 0.3, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
-          <Text style={[styles.avatarText, ff(fonts, "extraBold")]}>A</Text>
-        </View>
-        <View style={styles.flex1}>
-          <Text style={[styles.profileName, ff(fonts, "extraBold")]}>Alex</Text>
-          <Text style={[styles.profileSub, ff(fonts, "bold")]}>Premium clear voice · English · Calm tone</Text>
-        </View>
-      </ContentSurface>
+        <ContentSurface radiusValue={radius.lg} style={styles.profile} contentStyle={styles.profileInner}>
+          <View style={styles.avatar}>
+            <LinearGradient colors={[colors.lemonHi, colors.lemon]} start={{ x: 0.3, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
+            <Text style={[styles.avatarText, ff(fonts, "extraBold")]}>A</Text>
+          </View>
+          <View style={styles.flex1}>
+            <Text style={[styles.profileName, ff(fonts, "extraBold")]}>Alex</Text>
+            <Text style={[styles.profileSub, ff(fonts, "bold")]}>Premium clear voice · English · Calm tone</Text>
+          </View>
+        </ContentSurface>
 
-      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>PREFERENCES</Text>
-      <View style={styles.rows}>
-        {settingRows.map((row) => {
-          const Icon = settingsIcons[row.icon] ?? SlidersHorizontal;
-          const isToggle = row.toggle !== undefined;
-          const on = isToggle ? toggles[row.title] : false;
-          return (
-            <ContentSurface key={row.title} radiusValue={radius.md} style={styles.setRow} contentStyle={styles.setRowInner}>
-              <View style={styles.setWell}>
-                <Icon size={20} color={colors.ink} strokeWidth={2.4} />
-              </View>
-              <View style={styles.flex1}>
-                <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{row.title}</Text>
-                <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{isToggle ? (on ? "On" : "Off") : row.value}</Text>
-              </View>
-              {isToggle ? (
-                <Pressable
-                  onPress={() => flip(row.title)}
-                  hitSlop={10}
-                  accessibilityRole="switch"
-                  accessibilityState={{ checked: on }}
-                  accessibilityLabel={row.title}
-                >
-                  <Toggle on={on} />
-                </Pressable>
-              ) : (
-                <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>
-              )}
-            </ContentSurface>
-          );
-        })}
-      </View>
-    </ScrollView>
+        <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>PREFERENCES</Text>
+        <View style={styles.rows}>
+          {settingRows.map((row) => {
+            const Icon = settingsIcons[row.icon] ?? SlidersHorizontal;
+            const isToggle = row.toggle !== undefined;
+            const on = isToggle ? toggles[row.title] : false;
+            const body = (
+              <ContentSurface radiusValue={radius.md} style={styles.setRow} contentStyle={styles.setRowInner}>
+                <View style={styles.setWell}>
+                  <Icon size={20} color={colors.ink} strokeWidth={2.4} />
+                </View>
+                <View style={styles.flex1}>
+                  <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{row.title}</Text>
+                  <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{isToggle ? (on ? "On" : "Off") : values[row.title]}</Text>
+                </View>
+                {isToggle ? (
+                  <Pressable onPress={() => flip(row.title)} hitSlop={10} accessibilityRole="switch" accessibilityState={{ checked: on }} accessibilityLabel={row.title}>
+                    <Toggle on={on} />
+                  </Pressable>
+                ) : (
+                  <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>
+                )}
+              </ContentSurface>
+            );
+            if (isToggle) return <View key={row.title}>{body}</View>;
+            return (
+              <Pressable
+                key={row.title}
+                onPress={() => openDetail(row.title)}
+                accessibilityRole="button"
+                accessibilityLabel={`${row.title}, ${values[row.title]}`}
+                style={({ pressed }) => pressed && styles.cardPressed}
+              >
+                {body}
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      {detail !== null && (
+        <Animated.View style={[StyleSheet.absoluteFill, styles.detailPanel, { transform: [{ translateX: tx }] }]}>
+          <SettingsDetail
+            title={detail}
+            options={SETTING_OPTIONS[detail] ?? []}
+            selected={values[detail] ?? ""}
+            onBack={closeDetail}
+            onChoose={(opt) => choose(detail, opt)}
+            fonts={fonts}
+          />
+        </Animated.View>
+      )}
+    </View>
   );
 }
 
@@ -631,5 +788,31 @@ const styles = StyleSheet.create({
   toggle: { width: 46, height: 28, borderRadius: radius.pill, overflow: "hidden", justifyContent: "center", padding: 3 },
   toggleOff: { backgroundColor: "#E3E6EC" },
   toggleKnobOff: { marginLeft: 0 },
-  toggleKnob: { width: 22, height: 22, marginLeft: "auto", borderRadius: radius.pill, backgroundColor: colors.white, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 }
+  toggleKnob: { width: 22, height: 22, marginLeft: "auto", borderRadius: radius.pill, backgroundColor: colors.white, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
+
+  // --- Home board hero + urgent rows ---
+  heroCompact: {},
+  heroCompactInner: { alignItems: "center", paddingVertical: 20, paddingHorizontal: 18 },
+  heroPhotoWrapSm: { width: 104, height: 104, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, ...shadow.card },
+  heroTitleSm: { fontSize: 19, lineHeight: 25, fontWeight: "800", color: colors.ink, marginTop: 14, textAlign: "center", letterSpacing: -0.3, maxWidth: 260 },
+  heroSubSm: { fontSize: 13.5, lineHeight: 18, fontWeight: "600", color: colors.muted, marginTop: 5, textAlign: "center" },
+  urgentRow: { flexDirection: "row", alignItems: "center", gap: 14, minHeight: 60, paddingHorizontal: 16, paddingVertical: 13, borderRadius: radius.md, backgroundColor: "#FCEBD2", borderWidth: 1, borderColor: "#F4D9AC" },
+  urgentWell: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#F7D9AC" },
+  urgentText: { flex: 1, color: "#8A3D10", fontSize: 15.5, lineHeight: 20, fontWeight: "800" },
+
+  // --- Cards search input + empty state ---
+  searchInput: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: "600", paddingVertical: 0 },
+  emptyText: { color: colors.muted, fontSize: 14, fontWeight: "600", marginTop: 18, textAlign: "center" },
+
+  // --- Settings drill-down detail ---
+  detailPanel: { backgroundColor: colors.bg },
+  detailHeader: { width: "100%", maxWidth: 600, alignSelf: "center", paddingHorizontal: 20, paddingTop: isWeb ? 22 : 16, paddingBottom: 4, flexDirection: "row", alignItems: "center" },
+  detailBack: { flexDirection: "row", alignItems: "center", gap: 2, marginLeft: -6 },
+  detailBackText: { color: colors.ink, fontSize: 16, fontWeight: "700" },
+  detailScroll: { width: "100%", maxWidth: 600, alignSelf: "center", paddingHorizontal: 20, paddingBottom: 148 },
+  detailTitle: { fontSize: 26, lineHeight: 32, fontWeight: "800", color: colors.ink, letterSpacing: -0.3, marginTop: 6, marginBottom: 16 },
+  optRow: { minHeight: 56, paddingHorizontal: 16, paddingVertical: 14 },
+  optInner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  optText: { flex: 1, color: colors.ink, fontSize: 16, lineHeight: 21, fontWeight: "600" },
+  optDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: "#D7DAE1" }
 });
