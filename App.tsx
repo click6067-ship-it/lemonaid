@@ -98,6 +98,34 @@ function fmtTime(sec: number): string {
   return `0:${String(s).padStart(2, "0")}`;
 }
 
+// Demo voice: speak a phrase aloud using the best available English female voice
+// (web only). Prefers natural/neural voices so it doesn't sound robotic; degrades
+// gracefully to the platform default. Single shared voice for the whole demo.
+function speakPhrase(text: string) {
+  if (!isWeb || typeof window === "undefined") return;
+  const synth = (window as any).speechSynthesis;
+  if (!synth) return;
+  const run = () => {
+    const voices: any[] = synth.getVoices?.() ?? [];
+    const en = voices.filter((v) => /^en(-|_|$)/i.test(v.lang || ""));
+    const find = (re: RegExp) => en.find((v) => re.test(v.name || ""));
+    const voice =
+      find(/natural|neural|aria|jenny|emma|libby|sonia|ava|allison/i) ||
+      find(/samantha|google us english|female|zira|salli|joanna|google uk english female/i) ||
+      en[0] ||
+      voices[0];
+    const u = new (window as any).SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = (voice && voice.lang) || "en-US";
+    u.rate = 0.97;
+    u.pitch = 1.0;
+    synth.cancel();
+    synth.speak(u);
+  };
+  if ((synth.getVoices?.() ?? []).length) run();
+  else synth.addEventListener?.("voiceschanged", run, { once: true });
+}
+
 // Deterministic PRNG so a given phrase always renders the same waveform.
 function strSeed(s: string): number {
   let h = 2166136261;
@@ -267,6 +295,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const playClear = () => {
     stopTimer();
     setProgress(0);
+    speakPhrase(recognized);
     const startedAt = Date.now();
     timerRef.current = setInterval(() => {
       const p = Math.min(1, (Date.now() - startedAt) / (CLIP_SECONDS * 1000));
@@ -331,6 +360,9 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 }
 
 function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
+  const [activeCat, setActiveCat] = useState(categories[0]);
+  const shown = activeCat === "All" ? phraseCards : phraseCards.filter((c) => c.category === activeCat);
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
       <Toolbar title="Cards" sub="Tap a phrase to speak." fonts={fonts} />
@@ -341,24 +373,30 @@ function CardsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       </View>
 
       <View style={styles.chips}>
-        {categories.map((category, index) => {
-          const active = index === 0;
+        {categories.map((category) => {
+          const active = category === activeCat;
           return (
-            <View key={category} style={[styles.chip, active && styles.chipActive]}>
+            <Pressable
+              key={category}
+              onPress={() => setActiveCat(category)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              style={[styles.chip, active && styles.chipActive]}
+            >
               <Text style={[styles.chipText, active && styles.chipTextActive, ff(fonts, "extraBold")]}>{category}</Text>
-            </View>
+            </Pressable>
           );
         })}
       </View>
 
       <View style={styles.grid}>
-        {phraseCards.map((card) => {
+        {shown.map((card) => {
           const Icon = phraseIcons[card.image];
           return (
-            <Pressable key={card.phrase} accessibilityRole="button" accessibilityLabel={`Speak ${card.phrase}`} style={({ pressed }) => [styles.tile, pressed && styles.cardPressed]}>
+            <Pressable key={card.phrase} onPress={() => speakPhrase(card.phrase)} accessibilityRole="button" accessibilityLabel={`Speak ${card.phrase}`} style={({ pressed }) => [styles.tile, pressed && styles.cardPressed]}>
               <ContentSurface radiusValue={radius.md} style={styles.card} contentStyle={styles.cardInner}>
                 <View style={styles.cardWell}>
-                  <Icon size={21} color={colors.ink} strokeWidth={2.4} />
+                  <Icon size={24} color={colors.ink} strokeWidth={2.4} />
                 </View>
                 <View>
                   <Text style={[styles.cardTitle, ff(fonts, "bold")]}>{card.phrase}</Text>
@@ -392,15 +430,23 @@ function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>FAVORITES</Text>
       <View style={styles.rows}>
         {favorites.map((item) => (
-          <ContentSurface key={item.phrase} radiusValue={radius.md} style={styles.row} contentStyle={styles.rowBetween}>
-            <View style={styles.flex1}>
-              <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{item.phrase}</Text>
-              <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{item.category}</Text>
-            </View>
-            <Pressable accessibilityRole="button" accessibilityLabel={`Play ${item.phrase}`} style={styles.playMini}>
-              <Play size={15} color="#1A1400" fill="#1A1400" />
-            </Pressable>
-          </ContentSurface>
+          <Pressable
+            key={item.phrase}
+            onPress={() => speakPhrase(item.phrase)}
+            accessibilityRole="button"
+            accessibilityLabel={`Speak ${item.phrase}`}
+            style={({ pressed }) => pressed && styles.cardPressed}
+          >
+            <ContentSurface radiusValue={radius.md} style={styles.row} contentStyle={styles.rowBetween}>
+              <View style={styles.flex1}>
+                <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{item.phrase}</Text>
+                <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{item.category}</Text>
+              </View>
+              <View style={styles.playMini}>
+                <Play size={15} color="#1A1400" fill="#1A1400" />
+              </View>
+            </ContentSurface>
+          </Pressable>
         ))}
       </View>
     </ScrollView>
@@ -408,6 +454,13 @@ function SavedScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 }
 
 function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
+  const [toggles, setToggles] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(
+      settingRows.filter((r) => r.toggle !== undefined).map((r) => [r.title, r.toggle as boolean])
+    )
+  );
+  const flip = (title: string) => setToggles((t) => ({ ...t, [title]: !t[title] }));
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
       <Toolbar title="Settings" sub="Voice and access." fonts={fonts} />
@@ -427,6 +480,8 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
       <View style={styles.rows}>
         {settingRows.map((row) => {
           const Icon = settingsIcons[row.icon] ?? SlidersHorizontal;
+          const isToggle = row.toggle !== undefined;
+          const on = isToggle ? toggles[row.title] : false;
           return (
             <ContentSurface key={row.title} radiusValue={radius.md} style={styles.setRow} contentStyle={styles.setRowInner}>
               <View style={styles.setWell}>
@@ -434,9 +489,21 @@ function SettingsScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }
               </View>
               <View style={styles.flex1}>
                 <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{row.title}</Text>
-                <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{row.value}</Text>
+                <Text style={[styles.rowMeta, ff(fonts, "bold")]}>{isToggle ? (on ? "On" : "Off") : row.value}</Text>
               </View>
-              {row.toggle !== undefined ? <Toggle on={row.toggle} /> : <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>}
+              {isToggle ? (
+                <Pressable
+                  onPress={() => flip(row.title)}
+                  hitSlop={10}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: on }}
+                  accessibilityLabel={row.title}
+                >
+                  <Toggle on={on} />
+                </Pressable>
+              ) : (
+                <Text style={[styles.chev, ff(fonts, "bold")]}>›</Text>
+              )}
             </ContentSurface>
           );
         })}
@@ -466,7 +533,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: isWeb ? 26 : 22,
-    paddingBottom: 124
+    paddingBottom: 148
   },
 
   toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 14, paddingVertical: 10, marginBottom: 8 },
@@ -539,7 +606,7 @@ const styles = StyleSheet.create({
   card: { flex: 1, minHeight: 112 },
   cardInner: { flex: 1, justifyContent: "flex-start", padding: 15, minHeight: 112 },
   cardPressed: { transform: [{ scale: 0.975 }] },
-  cardWell: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: colors.well },
+  cardWell: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.well },
   cardTitle: { color: colors.ink, fontSize: 15, lineHeight: 19, fontWeight: "700", marginTop: 14 },
   cardCat: { color: colors.muted, fontSize: 12, lineHeight: 15, fontWeight: "600", marginTop: 3 },
 

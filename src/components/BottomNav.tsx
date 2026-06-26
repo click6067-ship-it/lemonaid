@@ -14,10 +14,12 @@ const tabs = [
 const isWeb = Platform.OS === "web";
 const webData = (o: object) => (isWeb ? ({ dataSet: o } as any) : {});
 
-// Active tab "color comes in" (Online Groceries-style): the selected icon + label
-// light up in a legible lemon-gold; inactive stay neutral gray.
-const ACTIVE_ICON = "#EFC23F";
-const ACTIVE_LABEL = "#8C6E14";
+// Active tab: a soft lemon PILL rides behind the selected icon (keeps the pale-yellow
+// brand cue) while the glyph + label stay dark and legible — so "you are here" no longer
+// depends on faint yellow-on-white. Inactive stay neutral gray.
+const ACTIVE_ICON = "#2E2A18";   // dark warm — readable on the pale lemon pill
+const ACTIVE_LABEL = "#5E4A05";  // ~6:1 on white
+const ACTIVE_PILL = "rgba(255,231,140,0.62)";
 
 type BottomNavProps = {
   activeTab: TabKey;
@@ -40,7 +42,7 @@ export function BottomNav({ activeTab, onChange }: BottomNavProps) {
               onPress={() => onChange(key)}
               style={styles.tab}
             >
-              <View style={styles.iconWrap}>
+              <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
                 <Icon
                   size={23}
                   color={active ? ACTIVE_ICON : colors.soft}
@@ -91,6 +93,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center"
+  },
+  iconWrapActive: {
+    backgroundColor: ACTIVE_PILL
   },
   label: {
     color: colors.soft,
