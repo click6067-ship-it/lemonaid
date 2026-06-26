@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
 
+import { WEB_FONT_FAMILIES } from "../fontPresets";
+
 /**
  * Web-only style enhancer for the Expo web build (react-native-web -> DOM).
  * Provides a calm app background and a clean frosted blur for the floating nav +
@@ -14,6 +16,21 @@ export function WebGlassFX() {
   useEffect(() => {
     if (Platform.OS !== "web" || typeof document === "undefined") return;
     if (document.getElementById(STYLE_ID)) return;
+
+    // Load candidate brand fonts (Google Fonts). Mapped to FontVariant in fontPresets.
+    if (!document.getElementById("lemonaid-fonts")) {
+      const pre1 = document.createElement("link");
+      pre1.rel = "preconnect"; pre1.href = "https://fonts.googleapis.com";
+      const pre2 = document.createElement("link");
+      pre2.rel = "preconnect"; pre2.href = "https://fonts.gstatic.com"; pre2.crossOrigin = "anonymous";
+      const link = document.createElement("link");
+      link.id = "lemonaid-fonts";
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?" + WEB_FONT_FAMILIES.map((f) => "family=" + f).join("&") + "&display=swap";
+      document.head.appendChild(pre1);
+      document.head.appendChild(pre2);
+      document.head.appendChild(link);
+    }
 
     const css = `
       [data-nav]{ backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3); }
@@ -31,8 +48,8 @@ export function WebGlassFX() {
       }
       [data-appbg]{
         background-image:
-          radial-gradient(120% 38% at 50% -8%, rgba(255,233,140,.16), transparent 60%),
-          linear-gradient(180deg, #FAFBFC 0%, #F3F4F7 46%, #F3F4F7 100%);
+          radial-gradient(120% 38% at 50% -8%, rgba(255,233,140,.18), transparent 60%),
+          linear-gradient(180deg, #FBF8F1 0%, #F6F3EC 46%, #F6F3EC 100%);
       }
     `;
     const style = document.createElement("style");

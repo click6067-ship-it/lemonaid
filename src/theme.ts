@@ -2,16 +2,19 @@ import type { ViewStyle } from "react-native";
 
 // Calm, high-contrast tokens. Lemon is the SINGLE accent — used only on the mic,
 // primary action, active tab, toggle and avatar. Everything else is clean neutral.
+
+// Warm "lemonade" ink: espresso near-black headings on a faintly warm canvas, so the
+// text ties to the lemon accent instead of fighting it with cold black.
 export const colors = {
-  ink: "#16181F",     // primary text
-  strong: "#353B47",  // secondary strong / icons
-  muted: "#5C6370",   // meta text — darkened to ~6:1 (was #697080) for AA legibility
-  soft: "#6E7682",    // labels / placeholder / inactive icon — ~4.6:1 (was #9AA1AE, ~2.5:1, sub-AA)
+  ink: "#221A11",     // primary text — warm espresso near-black
+  strong: "#473B2C",  // secondary strong / icons — warm dark
+  muted: "#5C6370",   // meta text — ~6:1 for AA legibility
+  soft: "#6E7682",    // labels / placeholder / inactive icon — ~4.6:1 (was #9AA1AE, sub-AA)
   line: "#ECEEF2",    // hairline border
   line2: "#E3E6EC",   // slightly stronger divider
   white: "#FFFFFF",
   card: "#FFFFFF",
-  bg: "#F3F4F7",      // app background — calm cool light gray
+  bg: "#F6F3EC",      // faintly warm canvas — cohesive with the lemon brand
   well: "#F1F3F6",    // inset wells inside cards
   cream: "#FFFDF7",
   lemon: "#FFE98C",   // accent — soft, light yellow
