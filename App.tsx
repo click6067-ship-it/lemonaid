@@ -14,7 +14,6 @@ import {
   Grid2X2,
   Hand,
   Heart,
-  Mic,
   Pill,
   Play,
   RotateCw,
@@ -44,6 +43,7 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import Svg, { Line } from "react-native-svg";
 
 import { BottomNav } from "./src/components/BottomNav";
 import { ContentSurface, LemonButton } from "./src/components/GlassSurface";
@@ -109,14 +109,6 @@ const WAVE_BARS = 88;
 function fmtTime(sec: number): string {
   const s = Math.max(0, Math.round(sec));
   return `0:${String(s).padStart(2, "0")}`;
-}
-
-// Time-aware greeting for the Home hero.
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
 }
 
 // Demo voice: speak a phrase aloud using the best available English female voice
@@ -318,13 +310,51 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
   );
 }
 
+// Circular live-input waveform ring around the lemon while it's "listening".
+function ListeningRing({ active, photo }: { active: boolean; photo: number }) {
+  const N = 48;
+  const size = photo + 44;
+  const [amps, setAmps] = useState<number[]>(() => new Array(N).fill(0.25));
+  useEffect(() => {
+    if (!active) return;
+    let t = 0;
+    const id = setInterval(() => {
+      t += 1;
+      setAmps(
+        new Array(N).fill(0).map((_, i) =>
+          Math.max(0.1, Math.min(1, 0.42 + 0.5 * Math.abs(Math.sin(i * 0.5 + t * 0.55)) + (Math.random() - 0.5) * 0.3))
+        )
+      );
+    }, 75);
+    return () => clearInterval(id);
+  }, [active]);
+  if (!active) return null;
+  const c = size / 2;
+  const rIn = photo / 2 + 6;
+  const off = (photo - size) / 2;
+  return (
+    <View pointerEvents="none" style={{ position: "absolute", left: off, top: off, width: size, height: size }}>
+      <Svg width={size} height={size}>
+        {amps.map((a, i) => {
+          const ang = (i / N) * Math.PI * 2 - Math.PI / 2;
+          const len = 3 + a * 14;
+          const x1 = c + Math.cos(ang) * rIn;
+          const y1 = c + Math.sin(ang) * rIn;
+          const x2 = c + Math.cos(ang) * (rIn + len);
+          const y2 = c + Math.sin(ang) * (rIn + len);
+          return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.lemon2} strokeWidth={3} strokeLinecap="round" />;
+        })}
+      </Svg>
+    </View>
+  );
+}
+
 function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [progress, setProgress] = useState(0);
   const [mode, setMode] = useState<"idle" | "listening" | "converting">("idle");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
-  const hello = greeting();
   const subText =
     mode === "listening"
       ? "Listening…"
@@ -408,14 +438,11 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
-        <Text style={[styles.heroGreet, ff(fonts, "extraBold")]}>{hello}, Alex</Text>
         <Pressable onPress={tapLemon} accessibilityRole="button" accessibilityLabel="Tap the lemon to clarify your voice" style={styles.lemonPressWrap}>
           <Animated.View style={[styles.heroPhotoWrapSm, { transform: [{ scale: lemonScale }] }]}>
             <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
           </Animated.View>
-          <View style={styles.lemonBadge}>
-            <Mic size={20} color="#1A1400" strokeWidth={2.6} />
-          </View>
+          <ListeningRing active={mode !== "idle"} photo={232} />
         </Pressable>
         <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Say it out loud.</Text>
         <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>{subText}</Text>
@@ -820,7 +847,7 @@ const styles = StyleSheet.create({
 
   // --- Home board hero + urgent rows ---
   heroCompact: {},
-  heroCompactInner: { alignItems: "center", justifyContent: "center", paddingVertical: 24, paddingHorizontal: 20 },
+  heroCompactInner: { alignItems: "center", justifyContent: "center", paddingVertical: 32, paddingHorizontal: 20 },
   heroGreet: { alignSelf: "stretch", textAlign: "left", fontSize: 16, lineHeight: 21, fontWeight: "800", color: colors.ink, letterSpacing: -0.2, marginBottom: 18 },
   lemonPressWrap: { position: "relative", alignItems: "center", justifyContent: "center" },
   lemonBadge: { position: "absolute", right: 14, bottom: 14, width: 48, height: 48, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: colors.lemon, borderWidth: 4, borderColor: colors.white, ...shadow.lemon },
