@@ -93,11 +93,6 @@ const settingsIcons: Record<string, LucideIcon> = {
   cloud: Cloud
 };
 
-// Home board: a small curated set of the most-needed phrases (tap → speak via TTS).
-const byImg = (img: string) => phraseCards.find((c) => c.image === img) as PhraseCard;
-const HOME_URGENT = ["help", "pain", "caregiver"].map(byImg);
-const HOME_QUICK = ["water", "bathroom", "rest", "medicine", "thanks", "yes"].map(byImg);
-
 // Selectable options for each drill-down Settings detail screen.
 const SETTING_OPTIONS: Record<string, string[]> = {
   "Voice Style": ["Natural, warm", "Bright & clear", "Calm & low", "Expressive"],
@@ -113,6 +108,14 @@ const WAVE_BARS = 88;
 function fmtTime(sec: number): string {
   const s = Math.max(0, Math.round(sec));
   return `0:${String(s).padStart(2, "0")}`;
+}
+
+// Time-aware greeting for the Home landing.
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 // Demo voice: speak a phrase aloud using the best available English female voice
@@ -243,27 +246,6 @@ function SpeakTile({ card, fonts }: { card: PhraseCard; fonts: FontSet }) {
   );
 }
 
-// Full-width urgent phrase row (Home), warm-tinted to stand apart from quick phrases.
-function UrgentRow({ card, fonts }: { card: PhraseCard; fonts: FontSet }) {
-  const Icon = phraseIcons[card.image];
-  return (
-    <Pressable
-      onPress={() => speakPhrase(card.phrase)}
-      accessibilityRole="button"
-      accessibilityLabel={`Speak ${card.phrase}`}
-      style={({ pressed }) => pressed && styles.cardPressed}
-    >
-      <View style={styles.urgentRow}>
-        <View style={styles.urgentWell}>
-          <Icon size={22} color="#8A3D10" strokeWidth={2.5} />
-        </View>
-        <Text style={[styles.urgentText, ff(fonts, "extraBold")]} numberOfLines={1}>{card.phrase}</Text>
-        <Play size={16} color="#8A3D10" fill="#8A3D10" />
-      </View>
-    </Pressable>
-  );
-}
-
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab());
   const fontsLoaded = useOptionalFonts();
@@ -340,6 +322,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
+  const hello = greeting();
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -376,25 +359,11 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         <View style={styles.heroPhotoWrapSm}>
           <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Tap a phrase to say it out loud.</Text>
-        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>We’ll speak it clearly, for you.</Text>
+        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>{hello}, Alex</Text>
+        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>What would you like to say?</Text>
       </ContentSurface>
 
-      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>IF YOU NEED HELP</Text>
-      <View style={styles.rows}>
-        {HOME_URGENT.map((card) => (
-          <UrgentRow key={card.phrase} card={card} fonts={fonts} />
-        ))}
-      </View>
-
-      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>QUICK PHRASES</Text>
-      <View style={styles.grid}>
-        {HOME_QUICK.map((card) => (
-          <SpeakTile key={card.phrase} card={card} fonts={fonts} />
-        ))}
-      </View>
-
-      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>OR SPEAK IN YOUR OWN WORDS</Text>
+      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>SPEAK IN YOUR OWN WORDS</Text>
       <ContentSurface radiusValue={radius.md} style={styles.result}>
         <Text style={[styles.resultText, ff(fonts, "bold")]}>{recognized}</Text>
         <Waveform wave={wave} progress={progress} />
