@@ -323,7 +323,6 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
   const hello = greeting();
-  const mostUsed = favorites[0].phrase;
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -346,22 +345,22 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <View style={styles.greetHeader}>
-        <View style={styles.flex1}>
-          <Text style={[styles.greetHi, ff(fonts, "bold")]}>{hello},</Text>
-          <Text style={[styles.greetName, ff(fonts, "extraBold")]}>Alex</Text>
-        </View>
-        <View style={styles.headerAvatar} accessibilityLabel="Alex">
-          <LinearGradient colors={[colors.lemonHi, colors.lemon]} start={{ x: 0.3, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
-          <Text style={[styles.headerAvatarText, ff(fonts, "extraBold")]}>A</Text>
+      <View style={styles.brandBar}>
+        <View style={styles.brandLeft}>
+          <Image source={logo} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Lemonaid logo" />
+          <View>
+            <Text style={[styles.brandName, ff(fonts, "extraBold")]}>Lemonaid</Text>
+            <Text style={[styles.brandTag, ff(fonts, "bold")]}>Small words, clear voice.</Text>
+          </View>
         </View>
       </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
-        <View style={styles.heroPhotoWrapLg}>
+        <View style={styles.heroPhotoWrapSm}>
           <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>What would you like to say?</Text>
+        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>{hello}, Alex</Text>
+        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>What would you like to say?</Text>
       </ContentSurface>
 
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>SPEAK IN YOUR OWN WORDS</Text>
@@ -386,24 +385,6 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
           </Pressable>
         </View>
       </ContentSurface>
-
-      <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>MOST USED</Text>
-      <Pressable
-        onPress={() => speakPhrase(mostUsed)}
-        accessibilityRole="button"
-        accessibilityLabel={`Speak ${mostUsed}`}
-        style={({ pressed }) => pressed && styles.cardPressed}
-      >
-        <ContentSurface radiusValue={radius.md} style={styles.row} contentStyle={styles.rowBetween}>
-          <View style={styles.flex1}>
-            <Text style={[styles.rowTitle, ff(fonts, "bold")]}>{mostUsed}</Text>
-            <Text style={[styles.rowMeta, ff(fonts, "bold")]}>Tap to speak</Text>
-          </View>
-          <View style={styles.playMini}>
-            <Play size={15} color="#1A1400" fill="#1A1400" />
-          </View>
-        </ContentSurface>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -778,18 +759,12 @@ const styles = StyleSheet.create({
   toggleKnobOff: { marginLeft: 0 },
   toggleKnob: { width: 22, height: 22, marginLeft: "auto", borderRadius: radius.pill, backgroundColor: colors.white, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
 
-  // --- Home greeting header + hero + most-used ---
-  greetHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, paddingVertical: 6, marginBottom: 18 },
-  greetHi: { fontSize: 14, lineHeight: 18, fontWeight: "600", color: colors.muted },
-  greetName: { fontSize: 25, lineHeight: 31, fontWeight: "800", color: colors.ink, letterSpacing: -0.4, marginTop: 1 },
-  headerAvatar: { width: 46, height: 46, borderRadius: radius.pill, overflow: "hidden", alignItems: "center", justifyContent: "center", ...shadow.card },
-  headerAvatarText: { color: "#1A1400", fontSize: 18, fontWeight: "800" },
-  heroCompact: {},
-  heroCompactInner: { alignItems: "center", paddingVertical: 22, paddingHorizontal: 18 },
-  heroPhotoWrapLg: { width: 124, height: 124, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, ...shadow.card },
-  heroPhotoWrapSm: { width: 104, height: 104, borderRadius: radius.pill, overflow: "hidden", borderWidth: 4, borderColor: colors.white, ...shadow.card },
-  heroTitleSm: { fontSize: 19, lineHeight: 25, fontWeight: "800", color: colors.ink, marginTop: 14, textAlign: "center", letterSpacing: -0.3, maxWidth: 260 },
-  heroSubSm: { fontSize: 13.5, lineHeight: 18, fontWeight: "600", color: colors.muted, marginTop: 5, textAlign: "center" },
+  // --- Home board hero + urgent rows ---
+  heroCompact: { flex: 1 },
+  heroCompactInner: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 28, paddingHorizontal: 20 },
+  heroPhotoWrapSm: { width: 190, height: 190, borderRadius: radius.pill, overflow: "hidden", borderWidth: 5, borderColor: colors.white, ...shadow.card },
+  heroTitleSm: { fontSize: 22, lineHeight: 28, fontWeight: "800", color: colors.ink, marginTop: 22, textAlign: "center", letterSpacing: -0.3, maxWidth: 280 },
+  heroSubSm: { fontSize: 14.5, lineHeight: 20, fontWeight: "600", color: colors.muted, marginTop: 7, textAlign: "center" },
   urgentRow: { flexDirection: "row", alignItems: "center", gap: 14, minHeight: 60, paddingHorizontal: 16, paddingVertical: 13, borderRadius: radius.md, backgroundColor: "#FCEBD2", borderWidth: 1, borderColor: "#F4D9AC" },
   urgentWell: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#F7D9AC" },
   urgentText: { flex: 1, color: "#8A3D10", fontSize: 15.5, lineHeight: 20, fontWeight: "800" },
