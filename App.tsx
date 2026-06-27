@@ -110,14 +110,6 @@ function fmtTime(sec: number): string {
   return `0:${String(s).padStart(2, "0")}`;
 }
 
-// Time-aware greeting for the Home landing.
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
-
 // Demo voice: speak a phrase aloud using the best available English female voice
 // (web only). Prefers natural/neural voices so it doesn't sound robotic; degrades
 // gracefully to the platform default. Single shared voice for the whole demo.
@@ -322,7 +314,6 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
-  const hello = greeting();
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -359,8 +350,8 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         <View style={styles.heroPhotoWrapSm}>
           <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>{hello}, Alex</Text>
-        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>What would you like to say?</Text>
+        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Tap a phrase to say it out loud.</Text>
+        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>We’ll speak it clearly, for you.</Text>
       </ContentSurface>
 
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>SPEAK IN YOUR OWN WORDS</Text>
