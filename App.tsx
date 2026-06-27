@@ -312,18 +312,18 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
 
 // Concentric ripple rings that spread out from the lemon while it's "listening".
 function ListeningRing({ active, photo }: { active: boolean; photo: number }) {
-  const rings = useRef([0, 1, 2].map(() => new Animated.Value(0))).current;
+  const rings = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
   useEffect(() => {
     if (!active) return;
     const timeouts: ReturnType<typeof setTimeout>[] = [];
     const anims = rings.map((v) =>
       Animated.loop(
-        Animated.timing(v, { toValue: 1, duration: 1900, easing: Easing.out(Easing.cubic), useNativeDriver: !isWeb })
+        Animated.timing(v, { toValue: 1, duration: 1300, easing: Easing.out(Easing.cubic), useNativeDriver: !isWeb })
       )
     );
     rings.forEach((v, i) => {
       v.setValue(0);
-      timeouts.push(setTimeout(() => anims[i].start(), i * 640));
+      timeouts.push(setTimeout(() => anims[i].start(), i * 325));
     });
     return () => {
       timeouts.forEach((t) => clearTimeout(t));
