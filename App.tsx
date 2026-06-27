@@ -14,6 +14,7 @@ import {
   Grid2X2,
   Hand,
   Heart,
+  Mic,
   Pill,
   Play,
   RotateCw,
@@ -108,6 +109,14 @@ const WAVE_BARS = 88;
 function fmtTime(sec: number): string {
   const s = Math.max(0, Math.round(sec));
   return `0:${String(s).padStart(2, "0")}`;
+}
+
+// Time-aware greeting for the Home hero.
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 // Demo voice: speak a phrase aloud using the best available English female voice
@@ -311,9 +320,17 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
 
 function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   const [progress, setProgress] = useState(0);
+  const [mode, setMode] = useState<"idle" | "listening" | "converting">("idle");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recognized = recognitionSamples[0];
   const wave = useMemo(() => buildWave(recognized, WAVE_BARS), [recognized]);
+  const hello = greeting();
+  const subText =
+    mode === "listening"
+      ? "Listening…"
+      : mode === "converting"
+        ? "Converting to a clear voice…"
+        : "We’ll speak it clearly, for you.";
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -334,17 +351,49 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
   };
 
   const lemonScale = useRef(new Animated.Value(1)).current;
-  const lemonDown = () => {
-    Animated.spring(lemonScale, { toValue: 0.94, useNativeDriver: !isWeb, speed: 50, bounciness: 0 }).start();
+  const pulseRef = useRef<Animated.CompositeAnimation | null>(null);
+  const seqRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearSeq = () => {
+    seqRef.current.forEach((t) => clearTimeout(t));
+    seqRef.current = [];
   };
+  const stopPulse = () => {
+    if (pulseRef.current) {
+      pulseRef.current.stop();
+      pulseRef.current = null;
+    }
+    Animated.spring(lemonScale, { toValue: 1, useNativeDriver: !isWeb, speed: 16, bounciness: 8 }).start();
+  };
+
+  // The lemon is the live voice clarifier: tap → it "listens" to the user's speech,
+  // "converts" it, then plays the clarified voice out of the result card below.
   const tapLemon = () => {
-    playClear();
-    Animated.sequence([
-      Animated.spring(lemonScale, { toValue: 1.06, useNativeDriver: !isWeb, speed: 30, bounciness: 16 }),
-      Animated.spring(lemonScale, { toValue: 1, useNativeDriver: !isWeb, speed: 14, bounciness: 12 })
-    ]).start();
+    if (mode !== "idle") return;
+    clearSeq();
+    setProgress(0);
+    setMode("listening");
+    pulseRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(lemonScale, { toValue: 1.045, duration: 560, useNativeDriver: !isWeb }),
+        Animated.timing(lemonScale, { toValue: 0.99, duration: 560, useNativeDriver: !isWeb })
+      ])
+    );
+    pulseRef.current.start();
+    seqRef.current.push(
+      setTimeout(() => {
+        setMode("converting");
+        seqRef.current.push(
+          setTimeout(() => {
+            stopPulse();
+            setMode("idle");
+            playClear();
+          }, 750)
+        );
+      }, 1100)
+    );
   };
-  useEffect(() => stopTimer, []);
+  useEffect(() => () => { stopTimer(); clearSeq(); if (pulseRef.current) pulseRef.current.stop(); }, []);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
@@ -359,12 +408,17 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
-        <Pressable onPress={tapLemon} onPressIn={lemonDown} accessibilityRole="button" accessibilityLabel="Tap the lemon to hear it spoken">
+        <Text style={[styles.heroGreet, ff(fonts, "extraBold")]}>{hello}, Alex</Text>
+        <Pressable onPress={tapLemon} accessibilityRole="button" accessibilityLabel="Tap the lemon to clarify your voice" style={styles.lemonPressWrap}>
           <Animated.View style={[styles.heroPhotoWrapSm, { transform: [{ scale: lemonScale }] }]}>
             <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
           </Animated.View>
+          <View style={styles.lemonBadge}>
+            <Mic size={20} color="#1A1400" strokeWidth={2.6} />
+          </View>
         </Pressable>
         <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Say it out loud.</Text>
+        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>{subText}</Text>
       </ContentSurface>
 
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>SPEAK IN YOUR OWN WORDS</Text>
@@ -766,7 +820,10 @@ const styles = StyleSheet.create({
 
   // --- Home board hero + urgent rows ---
   heroCompact: {},
-  heroCompactInner: { alignItems: "center", justifyContent: "center", paddingVertical: 32, paddingHorizontal: 20 },
+  heroCompactInner: { alignItems: "center", justifyContent: "center", paddingVertical: 24, paddingHorizontal: 20 },
+  heroGreet: { alignSelf: "stretch", textAlign: "left", fontSize: 16, lineHeight: 21, fontWeight: "800", color: colors.ink, letterSpacing: -0.2, marginBottom: 18 },
+  lemonPressWrap: { position: "relative", alignItems: "center", justifyContent: "center" },
+  lemonBadge: { position: "absolute", right: 14, bottom: 14, width: 48, height: 48, borderRadius: radius.pill, alignItems: "center", justifyContent: "center", backgroundColor: colors.lemon, borderWidth: 4, borderColor: colors.white, ...shadow.lemon },
   heroPhotoWrapSm: { width: 232, height: 232, borderRadius: radius.pill, overflow: "hidden", borderWidth: 5, borderColor: colors.white, ...shadow.card },
   heroTitleSm: { fontSize: 22, lineHeight: 28, fontWeight: "800", color: colors.ink, marginTop: 22, textAlign: "center", letterSpacing: -0.3, maxWidth: 280 },
   heroSubSm: { fontSize: 14.5, lineHeight: 20, fontWeight: "600", color: colors.muted, marginTop: 7, textAlign: "center" },
