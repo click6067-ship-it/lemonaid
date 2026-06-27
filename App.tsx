@@ -332,6 +332,18 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       if (p >= 1) stopTimer();
     }, 40);
   };
+
+  const lemonScale = useRef(new Animated.Value(1)).current;
+  const lemonDown = () => {
+    Animated.spring(lemonScale, { toValue: 0.94, useNativeDriver: !isWeb, speed: 50, bounciness: 0 }).start();
+  };
+  const tapLemon = () => {
+    playClear();
+    Animated.sequence([
+      Animated.spring(lemonScale, { toValue: 1.06, useNativeDriver: !isWeb, speed: 30, bounciness: 16 }),
+      Animated.spring(lemonScale, { toValue: 1, useNativeDriver: !isWeb, speed: 14, bounciness: 12 })
+    ]).start();
+  };
   useEffect(() => stopTimer, []);
 
   return (
@@ -347,9 +359,11 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
       </View>
 
       <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
-        <View style={styles.heroPhotoWrapSm}>
-          <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
-        </View>
+        <Pressable onPress={tapLemon} onPressIn={lemonDown} accessibilityRole="button" accessibilityLabel="Tap the lemon to hear it spoken">
+          <Animated.View style={[styles.heroPhotoWrapSm, { transform: [{ scale: lemonScale }] }]}>
+            <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
+          </Animated.View>
+        </Pressable>
         <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Say it out loud.</Text>
       </ContentSurface>
 
