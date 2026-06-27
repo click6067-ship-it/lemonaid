@@ -207,7 +207,7 @@ function Waveform({ wave, progress }: { wave: number[]; progress: number }) {
         return (
           <View
             key={i}
-            style={[styles.waveBar, { height: 3 + Math.pow(h, 1.25) * 53, backgroundColor: played ? colors.lemon2 : "#CBD0D8" }]}
+            style={[styles.waveBar, { height: 3 + Math.pow(h, 1.25) * 72, backgroundColor: played ? colors.lemon2 : "#CBD0D8" }]}
           />
         );
       })}
@@ -350,8 +350,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
         <View style={styles.heroPhotoWrapSm}>
           <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
         </View>
-        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Tap a phrase to say it out loud.</Text>
-        <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>We’ll speak it clearly, for you.</Text>
+        <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Say it out loud.</Text>
       </ContentSurface>
 
       <Text style={[styles.sectionLabel, ff(fonts, "extraBold")]}>SPEAK IN YOUR OWN WORDS</Text>
@@ -363,7 +362,7 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
           <Text style={[styles.timeText, ff(fonts, "bold")]}>{fmtTime(CLIP_SECONDS)}</Text>
         </View>
         <View style={styles.resultActions}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Play clear voice" onPress={playClear} style={styles.flex1}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Play clear voice" onPress={playClear} style={({ pressed }) => [styles.flex1, pressed && styles.lemonPress]}>
             <LemonButton>
               <View style={styles.playRow}>
                 <Play size={17} color="#1A1400" fill="#1A1400" />
@@ -679,7 +678,7 @@ const styles = StyleSheet.create({
   speakBtn: { width: "100%", minHeight: 56 },
   speakText: { color: "#1A1400", fontSize: 16, fontWeight: "800" },
 
-  result: { marginTop: 14, padding: 18 },
+  result: { marginTop: 14, padding: 22 },
   label: { ...type.label },
   resultText: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: "700", marginTop: 8 },
   resultActions: { flexDirection: "row", gap: 10, marginTop: 14, alignItems: "stretch" },
@@ -689,7 +688,7 @@ const styles = StyleSheet.create({
     width: 48, minHeight: 48, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.well, borderWidth: 1, borderColor: colors.line
   },
-  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 58, marginTop: 16, marginBottom: 10 },
+  wave: { flexDirection: "row", alignItems: "center", gap: 1.5, height: 78, marginTop: 18, marginBottom: 12 },
   waveBar: { flex: 1, borderRadius: 1 },
   timeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   timeText: { color: colors.muted, fontSize: 11.5, lineHeight: 14, fontWeight: "600" },
@@ -723,6 +722,7 @@ const styles = StyleSheet.create({
   card: { flex: 1, minHeight: 112 },
   cardInner: { flex: 1, justifyContent: "flex-start", padding: 15, minHeight: 112 },
   cardPressed: { transform: [{ scale: 0.975 }] },
+  lemonPress: { transform: [{ scale: 0.96 }], opacity: 0.92 },
   cardWell: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.well },
   cardTitle: { color: colors.ink, fontSize: 15, lineHeight: 19, fontWeight: "700", marginTop: 14 },
   cardCat: { color: colors.muted, fontSize: 12, lineHeight: 15, fontWeight: "600", marginTop: 3 },
@@ -751,9 +751,9 @@ const styles = StyleSheet.create({
   toggleKnob: { width: 22, height: 22, marginLeft: "auto", borderRadius: radius.pill, backgroundColor: colors.white, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 5, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
 
   // --- Home board hero + urgent rows ---
-  heroCompact: { flex: 1 },
-  heroCompactInner: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 28, paddingHorizontal: 20 },
-  heroPhotoWrapSm: { width: 190, height: 190, borderRadius: radius.pill, overflow: "hidden", borderWidth: 5, borderColor: colors.white, ...shadow.card },
+  heroCompact: {},
+  heroCompactInner: { alignItems: "center", justifyContent: "center", paddingVertical: 32, paddingHorizontal: 20 },
+  heroPhotoWrapSm: { width: 232, height: 232, borderRadius: radius.pill, overflow: "hidden", borderWidth: 5, borderColor: colors.white, ...shadow.card },
   heroTitleSm: { fontSize: 22, lineHeight: 28, fontWeight: "800", color: colors.ink, marginTop: 22, textAlign: "center", letterSpacing: -0.3, maxWidth: 280 },
   heroSubSm: { fontSize: 14.5, lineHeight: 20, fontWeight: "600", color: colors.muted, marginTop: 7, textAlign: "center" },
   urgentRow: { flexDirection: "row", alignItems: "center", gap: 14, minHeight: 60, paddingHorizontal: 16, paddingVertical: 13, borderRadius: radius.md, backgroundColor: "#FCEBD2", borderWidth: 1, borderColor: "#F4D9AC" },
