@@ -312,18 +312,18 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
 
 // Concentric ripple rings that spread out from the lemon while it's "listening".
 function ListeningRing({ active, photo }: { active: boolean; photo: number }) {
-  const rings = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
+  const rings = useRef([0, 1, 2, 3, 4, 5].map(() => new Animated.Value(0))).current;
   useEffect(() => {
     if (!active) return;
     const timeouts: ReturnType<typeof setTimeout>[] = [];
     const anims = rings.map((v) =>
       Animated.loop(
-        Animated.timing(v, { toValue: 1, duration: 1300, easing: Easing.out(Easing.cubic), useNativeDriver: !isWeb })
+        Animated.timing(v, { toValue: 1, duration: 900, easing: Easing.out(Easing.cubic), useNativeDriver: !isWeb })
       )
     );
     rings.forEach((v, i) => {
       v.setValue(0);
-      timeouts.push(setTimeout(() => anims[i].start(), i * 325));
+      timeouts.push(setTimeout(() => anims[i].start(), i * 150));
     });
     return () => {
       timeouts.forEach((t) => clearTimeout(t));
@@ -435,7 +435,9 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
       <View style={styles.brandBar}>
         <View style={styles.brandLeft}>
-          <Image source={logo} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Lemonaid logo" />
+          <View style={styles.brandLogoTile}>
+            <Image source={logo} style={styles.brandLogo} resizeMode="contain" accessibilityLabel="Lemonaid logo" />
+          </View>
           <View>
             <Text style={[styles.brandName, ff(fonts, "extraBold")]}>Lemonaid</Text>
             <Text style={[styles.brandTag, ff(fonts, "bold")]}>Small words, clear voice.</Text>
@@ -766,7 +768,8 @@ const styles = StyleSheet.create({
 
   brandBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 6, marginBottom: 16 },
   brandLeft: { flexDirection: "row", alignItems: "center", gap: 11 },
-  brandLogo: { width: 42, height: 42 },
+  brandLogoTile: { width: 44, height: 44, borderRadius: radius.sm, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center", overflow: "hidden", ...shadow.card },
+  brandLogo: { width: 30, height: 30 },
   brandName: { fontSize: 20, lineHeight: 24, fontWeight: "800", color: colors.ink, letterSpacing: -0.3 },
   brandTag: { fontSize: 12.5, lineHeight: 16, fontWeight: "600", color: colors.muted, marginTop: 1 },
   hero: { flex: 1 },
