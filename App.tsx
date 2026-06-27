@@ -33,6 +33,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Animated,
+  Easing,
   Image,
   Platform,
   Pressable,
@@ -43,7 +44,6 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
-import Svg, { Line } from "react-native-svg";
 
 import { BottomNav } from "./src/components/BottomNav";
 import { ContentSurface, LemonButton } from "./src/components/GlassSurface";
@@ -310,41 +310,47 @@ function Toolbar({ title, sub, fonts }: { title: string; sub: string; fonts: Fon
   );
 }
 
-// Circular live-input waveform ring around the lemon while it's "listening".
+// Concentric ripple rings that spread out from the lemon while it's "listening".
 function ListeningRing({ active, photo }: { active: boolean; photo: number }) {
-  const N = 48;
-  const size = photo + 44;
-  const [amps, setAmps] = useState<number[]>(() => new Array(N).fill(0.25));
+  const rings = useRef([0, 1, 2].map(() => new Animated.Value(0))).current;
   useEffect(() => {
     if (!active) return;
-    let t = 0;
-    const id = setInterval(() => {
-      t += 1;
-      setAmps(
-        new Array(N).fill(0).map((_, i) =>
-          Math.max(0.1, Math.min(1, 0.42 + 0.5 * Math.abs(Math.sin(i * 0.5 + t * 0.55)) + (Math.random() - 0.5) * 0.3))
-        )
-      );
-    }, 75);
-    return () => clearInterval(id);
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const anims = rings.map((v) =>
+      Animated.loop(
+        Animated.timing(v, { toValue: 1, duration: 1900, easing: Easing.out(Easing.cubic), useNativeDriver: !isWeb })
+      )
+    );
+    rings.forEach((v, i) => {
+      v.setValue(0);
+      timeouts.push(setTimeout(() => anims[i].start(), i * 640));
+    });
+    return () => {
+      timeouts.forEach((t) => clearTimeout(t));
+      anims.forEach((a) => a.stop());
+      rings.forEach((v) => v.setValue(0));
+    };
   }, [active]);
   if (!active) return null;
-  const c = size / 2;
-  const rIn = photo / 2 + 6;
-  const off = (photo - size) / 2;
+  const base = photo + 4;
+  const off = (photo - base) / 2;
   return (
-    <View pointerEvents="none" style={{ position: "absolute", left: off, top: off, width: size, height: size }}>
-      <Svg width={size} height={size}>
-        {amps.map((a, i) => {
-          const ang = (i / N) * Math.PI * 2 - Math.PI / 2;
-          const len = 3 + a * 14;
-          const x1 = c + Math.cos(ang) * rIn;
-          const y1 = c + Math.sin(ang) * rIn;
-          const x2 = c + Math.cos(ang) * (rIn + len);
-          const y2 = c + Math.sin(ang) * (rIn + len);
-          return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.lemon2} strokeWidth={3} strokeLinecap="round" />;
-        })}
-      </Svg>
+    <View pointerEvents="none" style={{ position: "absolute", left: off, top: off, width: base, height: base, alignItems: "center", justifyContent: "center" }}>
+      {rings.map((v, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: "absolute",
+            width: base,
+            height: base,
+            borderRadius: base / 2,
+            borderWidth: 2.5,
+            borderColor: colors.lemon2,
+            opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }),
+            transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.45] }) }]
+          }}
+        />
+      ))}
     </View>
   );
 }
@@ -439,10 +445,10 @@ function HomeScreen({ compact, fonts }: { compact: boolean; fonts: FontSet }) {
 
       <ContentSurface radiusValue={radius.lg} style={styles.heroCompact} contentStyle={styles.heroCompactInner}>
         <Pressable onPress={tapLemon} accessibilityRole="button" accessibilityLabel="Tap the lemon to clarify your voice" style={styles.lemonPressWrap}>
+          <ListeningRing active={mode !== "idle"} photo={232} />
           <Animated.View style={[styles.heroPhotoWrapSm, { transform: [{ scale: lemonScale }] }]}>
             <Image source={lemonPhoto} style={styles.heroPhoto} resizeMode="cover" accessibilityLabel="Fresh lemon" />
           </Animated.View>
-          <ListeningRing active={mode !== "idle"} photo={232} />
         </Pressable>
         <Text style={[styles.heroTitleSm, ff(fonts, "extraBold")]}>Say it out loud.</Text>
         <Text style={[styles.heroSubSm, ff(fonts, "bold")]}>{subText}</Text>
